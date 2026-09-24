@@ -169,9 +169,13 @@ def amo_rows(cfg, since, until, tz):
     day = lambda ts: datetime.fromtimestamp(ts, tz).date().isoformat()
 
     # заявки: сделки воронки, созданные за период
+    fresh = set()
     for l in pages("leads", {"filter[pipeline_id]": a["pipeline_id"],
                              "filter[created_at][from]": t0, "filter[created_at][to]": t1}, "leads"):
         days[day(l["created_at"])]["crm_leads"] += 1
+        fresh.add(l["id"])
+    # с датой старта этапы считаем только по сделкам, пришедшим после старта: старые сделки в отчёт не входят
+    only_fresh = bool(cfg.get("start_date"))
 
     # этапы: по истории смены статусов. Сделка попадает в этап в тот день, когда впервые
     # перешла его порог (перескок через этапы засчитывает все пройденные). Уход в «не реализованные» не считается.
@@ -186,6 +190,8 @@ def amo_rows(cfg, since, until, tz):
         except (KeyError, IndexError, TypeError):
             continue
         if after.get("pipeline_id") != a["pipeline_id"] or after["id"] == 143:
+            continue
+        if only_fresh and e["entity_id"] not in fresh:
             continue
         s_from = order.get(before["id"], -1) if before.get("pipeline_id") == a["pipeline_id"] else -1
         s_to = order.get(after["id"], -1)

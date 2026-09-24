@@ -206,7 +206,7 @@ function tag(v,norm,higherBetter){
 
 function render(){
   const [a0,b,cap]=range(period);
-  const first=D.ads.reduce((m,r)=>r.date<m?r.date:m,'9999');
+  const first=[...D.ads.filter(r=>r.spend||r.leads).map(r=>r.date),...Object.keys(D.crm_days||{})].reduce((m,d)=>d<m?d:m,'9999');
   const a=first>a0&&first<=b?first:a0;          // пустые дни до запуска рекламы не показываем
   const rows=days(a,b), s=total(rows), st=ST(), last=st.length-1, on=crmOn();
   $('hero-cap').textContent=cap;

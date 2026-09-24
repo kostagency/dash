@@ -145,6 +145,11 @@ def amo_rows(cfg, since, until, tz):
         raise RuntimeError(f"amo: не читается воронка {a['pipeline_id']}: {pipe}")
     order = {s["id"]: s["sort"] for s in pipe["_embedded"]["statuses"]}
     stages = a["stages"]
+    if any(not st["status_ids"] for st in stages):
+        # этапы ещё не сопоставлены: печатаем статусы воронки в лог, чтобы их разметить в конфиге
+        print("  amo: статусы воронки (id, сортировка, название):")
+        for s in sorted(pipe["_embedded"]["statuses"], key=lambda s: s["sort"]):
+            print(f"    {s['id']}\t{s['sort']}\t{s['name']}")
     stage_sort = [min((order.get(i, 10**9) for i in st["status_ids"]), default=10**9) for st in stages]
 
     t0 = int(datetime.combine(since, datetime.min.time(), tz).timestamp())

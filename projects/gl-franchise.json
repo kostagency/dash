@@ -12,7 +12,7 @@
     ]
   },
   "crm": {
-    "type": "none",
+    "type": "amo",
     "amo": {
       "domain": "abroadgrandluxekz.amocrm.ru",
       "token_env": "AMO_TOKEN_GL_FRANCHISE",

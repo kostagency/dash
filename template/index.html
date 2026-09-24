@@ -9,309 +9,290 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef1f6; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
-  --brand:#2f6fed; --brand2:#1d4fd7; --brand-ink:#ffffff; --soft:#f5f7fb;
-  --ok:#0f9d58; --ok-bg:#e6f6ee; --warn:#b7791f; --warn-bg:#fdf3e1; --bad:#d93a3a; --bad-bg:#fdecec;
-  --bar:#2f6fed; --bar2:#9db8f7; --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06);
+  --bg:#e9edf3; --panel:#f7f8fb; --card:#ffffff; --ink:#0d1526; --muted:#7a8599; --faint:#a8b1c2; --line:#e6eaf1;
+  --brand:#2e6cf0; --brand2:#1f55d6; --dark:#0d1526; --soft:#f2f4f8;
+  --ok:#11a75c; --ok-bg:#e3f6ec; --bad:#e0413f; --bad-bg:#fde9e8; --wait:#8a94a8; --wait-bg:#eef0f4;
+  --shadow:0 1px 2px rgba(13,21,38,.04),0 10px 30px rgba(13,21,38,.06);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0b1020; --card:#141a2e; --ink:#e8ecf6; --muted:#8b95ad; --line:#232b45;
-  --brand:#3b7bff; --brand2:#2a5fe0; --soft:#1a2139;
-  --ok:#3ccf87; --ok-bg:#12301f; --warn:#f0b54a; --warn-bg:#33280f; --bad:#ff6b6b; --bad-bg:#3a1618;
-  --bar:#4d86ff; --bar2:#2d3f6e; --shadow:none;
+  --bg:#070b15; --panel:#0e1424; --card:#151c30; --ink:#e9edf6; --muted:#8a95ad; --faint:#5d6882; --line:#232c45;
+  --brand:#3d7bff; --brand2:#2a5fe0; --dark:#e9edf6; --soft:#1b2339;
+  --ok:#3ccf87; --ok-bg:#11301f; --bad:#ff6b6b; --bad-bg:#3a1618; --wait:#8a95ad; --wait-bg:#1f2740; --shadow:none;
 }}
 :root[data-theme="dark"]{
-  --bg:#0b1020; --card:#141a2e; --ink:#e8ecf6; --muted:#8b95ad; --line:#232b45;
-  --brand:#3b7bff; --brand2:#2a5fe0; --soft:#1a2139;
-  --ok:#3ccf87; --ok-bg:#12301f; --warn:#f0b54a; --warn-bg:#33280f; --bad:#ff6b6b; --bad-bg:#3a1618;
-  --bar:#4d86ff; --bar2:#2d3f6e; --shadow:none;
+  --bg:#070b15; --panel:#0e1424; --card:#151c30; --ink:#e9edf6; --muted:#8a95ad; --faint:#5d6882; --line:#232c45;
+  --brand:#3d7bff; --brand2:#2a5fe0; --dark:#e9edf6; --soft:#1b2339;
+  --ok:#3ccf87; --ok-bg:#11301f; --bad:#ff6b6b; --bad-bg:#3a1618; --wait:#8a95ad; --wait-bg:#1f2740; --shadow:none;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:500 14px/1.45 Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:20px}
-.eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 14px/1.4 Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1200px;margin:24px auto;padding:0 16px 40px}
+.panel{background:var(--panel);border-radius:28px;padding:22px;box-shadow:var(--shadow)}
 .num{font-variant-numeric:tabular-nums}
-header.top{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
-.brand{display:flex;gap:14px;align-items:center}
-.logo{width:48px;height:48px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;flex:none}
-h1{margin:2px 0 0;font-size:22px;font-weight:800;letter-spacing:-.01em}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.chips{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:999px;box-shadow:var(--shadow);flex-wrap:wrap}
-.chip{border:0;background:transparent;color:var(--muted);font:700 12px Manrope,sans-serif;padding:8px 12px;border-radius:999px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--brand);color:#fff}
-.btn{border:0;background:var(--ink);color:var(--card);font:700 12px Manrope,sans-serif;padding:10px 14px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
-.btn:disabled{opacity:.6;cursor:default}
-.updated{font-size:12px;color:var(--muted)}
-.grid-top{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
-.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:var(--brand-ink)}
-.hero .eyebrow{color:rgba(255,255,255,.75)}
-.hero-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.hk{background:rgba(255,255,255,.12);border-radius:14px;padding:12px 14px}
-.hk .l{font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.06em}
-.hk .v{font-size:22px;font-weight:800;margin-top:4px}
-.hk .s{font-size:11px;opacity:.75;margin-top:2px}
-.hero-note{margin-top:12px;font-size:12px;opacity:.85}
-.funnel-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
-.funnel-row:last-child{border-bottom:0}
-.funnel-row .l{font-weight:700}
-.funnel-row .s{font-size:11px;color:var(--muted)}
-.funnel-row .v{font-size:20px;font-weight:800;color:var(--brand)}
-.funnel-row.off .v{color:var(--muted)}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
-.kpi .top{display:flex;justify-content:space-between;align-items:center}
-.kpi .v{font-size:24px;font-weight:800;margin-top:8px}
-.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
-.badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
-.b-ok{background:var(--ok-bg);color:var(--ok)} .b-warn{background:var(--warn-bg);color:var(--warn)} .b-bad{background:var(--bad-bg);color:var(--bad)} .b-none{background:var(--soft);color:var(--muted)}
-section.card{margin-bottom:16px}
-.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-.sec-h h2{margin:0;font-size:16px;font-weight:800}
-.sec-h .hint{font-size:12px;color:var(--muted)}
-.chart{width:100%;height:220px;display:block}
-.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:6px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.tbl-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-th:first-child,td:first-child{text-align:left}
-tr.total td{font-weight:800;background:var(--soft)}
-td.dim{color:var(--muted)}
-.weeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.week{background:var(--soft);border-radius:14px;padding:14px}
-.week .d{font-size:11px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
-.week .g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.week .g div span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}
-.week .g div b{font-size:15px}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
-.st-on{background:var(--ok)} .st-off{background:var(--line)}
-.crm-empty{background:var(--soft);border-radius:14px;padding:14px;font-size:13px;color:var(--muted);margin-top:10px}
-.foot{font-size:12px;color:var(--muted);text-align:center;margin-top:20px}
-.err{background:var(--bad-bg);color:var(--bad);padding:14px;border-radius:14px;margin-bottom:16px;display:none}
-@media (max-width:900px){.grid-top{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:520px){.hero-kpis{grid-template-columns:repeat(2,1fr)}.hk .v{font-size:19px}.kpi .v{font-size:20px}h1{font-size:19px}.kpis{gap:10px}}
+.cap{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* шапка */
+.head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--card);border-radius:22px;padding:14px 18px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:50px;height:50px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;text-align:center;font-size:9px;font-weight:800;letter-spacing:.04em;line-height:1.05;flex:none;padding:6px}
+.brand .cap{color:var(--brand)}
+h1{margin:3px 0 0;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{border:0;border-radius:999px;padding:8px 13px;font:800 11px Manrope,sans-serif;white-space:nowrap}
+.pill.dark{background:var(--dark);color:var(--card)}
+.pill.blue{background:var(--brand);color:#fff;cursor:pointer}
+.pill.blue:disabled{opacity:.6;cursor:default}
+.pill.ghost{background:transparent;color:var(--muted);font-weight:700}
+.periods{display:flex;gap:2px;background:var(--soft);border-radius:999px;padding:3px}
+.periods button{border:0;background:transparent;color:var(--muted);font:800 11px Manrope,sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer}
+.periods button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* главное + воронка */
+.top{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin-bottom:18px}
+.hero{background:linear-gradient(140deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;border-radius:22px;padding:22px}
+.hero .cap{color:rgba(255,255,255,.7)}
+.hero-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.ht{background:rgba(255,255,255,.12);border-radius:16px;padding:14px}
+.ht .cap{font-size:9px}
+.ht .v{font-size:23px;font-weight:800;margin-top:8px}
+.ht .s{font-size:10px;color:rgba(255,255,255,.65);margin-top:3px}
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pl{background:rgba(255,255,255,.12);border-radius:14px;padding:12px 14px}
+.pl .row{display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:rgba(255,255,255,.85)}
+.bar{height:4px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff;border-radius:4px}
+
+.funnel{background:var(--card);border-radius:22px;padding:22px}
+.funnel .h{display:flex;justify-content:space-between;align-items:flex-start}
+.funnel h2{margin:4px 0 8px;font-size:17px;font-weight:800}
+.live{font-size:10px;font-weight:800;color:var(--brand)}
+.fr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.fr:last-child{border-bottom:0}
+.fr .l{font-size:13px;font-weight:800}
+.fr .s{font-size:10px;color:var(--muted);margin-top:1px}
+.fr .v{font-size:19px;font-weight:800;color:var(--brand)}
+.fr.wait .v{color:var(--faint)}
+
+/* плитки */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border-radius:18px;padding:16px 18px}
+.kpi .t{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kpi .v{font-size:25px;font-weight:800;margin-top:12px}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:2px}
+.tag{font-size:9px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.tag.ok{background:var(--ok-bg);color:var(--ok)} .tag.bad{background:var(--bad-bg);color:var(--bad)} .tag.wait{background:var(--wait-bg);color:var(--wait)}
+
+/* динамика */
+.box{background:var(--card);border-radius:22px;padding:20px 22px;margin-bottom:18px}
+.box .h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.hint{font-size:11px;color:var(--faint);font-weight:700}
+.scroll{overflow-x:auto;margin:0 -22px;padding:0 22px}
+table{border-collapse:collapse;font-size:12px;width:100%}
+th,td{padding:10px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--card);font-weight:800;color:var(--muted);font-size:11px;min-width:150px;white-space:normal}
+td.tot{font-weight:800;color:var(--ink)}
+td.z{color:var(--faint)}
+tr.sub td:first-child{padding-left:22px;font-weight:700}
+
+.weeks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.wk{background:var(--soft);border-radius:18px;padding:16px}
+.wk .d{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+.wk .g{display:grid;grid-template-columns:1fr 1fr;gap:14px 10px;margin-top:14px}
+.wk .g .cap{font-size:8px}
+.wk .g b{display:block;font-size:15px;margin-top:3px}
+
+.note{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:12px;color:var(--muted);margin-top:12px;font-weight:600}
+.foot{font-size:11px;color:var(--faint);text-align:center;margin-top:16px;font-weight:600}
+.err{background:var(--bad-bg);color:var(--bad);padding:12px 14px;border-radius:14px;margin-bottom:14px;display:none}
+
+@media (max-width:960px){.top{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.weeks{grid-template-columns:1fr}}
+@media (max-width:560px){.panel{padding:12px;border-radius:20px}.page{margin:12px auto;padding:0 10px 30px}.hero-tiles{grid-template-columns:1fr 1fr}.ht .v{font-size:19px}.plan{grid-template-columns:1fr}.kpi .v{font-size:21px}.kpis{gap:10px}h1{font-size:18px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
+<div class="page"><div class="panel">
+
+  <div class="head">
     <div class="brand">
-      <div class="logo" id="logo">··</div>
-      <div><div class="eyebrow" id="subtitle">Ежедневная аналитика проекта</div><h1 id="title">Загрузка…</h1></div>
+      <div class="logo" id="logo">GL</div>
+      <div><div class="cap" id="brand">Дашборд</div><h1 id="title">Загрузка…</h1></div>
     </div>
-    <div class="controls">
-      <div class="chips" role="group" aria-label="Период" id="chips">
-        <button class="chip" data-p="today">Сегодня</button>
-        <button class="chip" data-p="7">7 дней</button>
-        <button class="chip" data-p="month" aria-pressed="true">Этот месяц</button>
-        <button class="chip" data-p="prev">Прошлый месяц</button>
+    <div class="pills">
+      <span class="pill dark" id="conn">Подключения</span>
+      <div class="periods" role="group" aria-label="Период">
+        <button data-p="today">Сегодня</button><button data-p="7">7 дней</button><button data-p="month" aria-pressed="true">Месяц</button><button data-p="prev">Прошлый</button>
       </div>
-      <button class="btn" id="refresh" title="Подтянуть свежие данные">↻ Обновить</button>
+      <button class="pill blue" id="refresh">Обновить</button>
+      <span class="pill ghost num" id="range"></span>
     </div>
-  </header>
-  <div class="updated" id="updated" style="margin:-8px 0 14px"></div>
+  </div>
   <div class="err" id="err"></div>
 
-  <div class="grid-top">
-    <div class="card hero">
-      <div class="eyebrow" id="hero-label">Главное за период</div>
-      <div class="hero-kpis" id="hero"></div>
-      <div class="hero-note" id="hero-note"></div>
+  <div class="top">
+    <div class="hero">
+      <div class="cap" id="hero-cap">Главное за месяц</div>
+      <div class="hero-tiles" id="hero"></div>
+      <div class="plan" id="plan"></div>
     </div>
-    <div class="card">
-      <div class="sec-h"><h2>Реклама — продажи</h2><span class="hint">воронка за период</span></div>
+    <div class="funnel">
+      <div class="h"><div><div class="cap">Воронка</div><h2>Реклама → продажи</h2></div><span class="live">Live</span></div>
       <div id="funnel"></div>
     </div>
   </div>
 
   <div class="kpis" id="kpis"></div>
 
-  <section class="card">
-    <div class="sec-h"><h2>Динамика по дням</h2><span class="hint" id="chart-hint"></span></div>
-    <svg class="chart" id="chart" role="img" aria-label="Расход и лиды по дням"></svg>
-    <div class="legend"><span><i style="background:var(--bar)"></i>Расход</span><span><i style="background:var(--ok);border-radius:50%"></i>Лиды</span></div>
-  </section>
+  <div class="box">
+    <div class="h"><div class="cap">Динамика по дням</div><span class="hint">сначала итог периода, дальше дни от свежих к старым</span></div>
+    <div class="scroll"><table id="days"></table></div>
+  </div>
 
-  <section class="card">
-    <div class="sec-h"><h2>По неделям</h2><span class="hint">последние 4 недели</span></div>
+  <div class="box">
+    <div class="h"><div class="cap">По неделям</div><span class="hint">текущая и две прошлые</span></div>
     <div class="weeks" id="weeks"></div>
-  </section>
-
-  <section class="card">
-    <div class="sec-h"><h2>Группы объявлений</h2><span class="hint">за период, сначала лучшие по цене лида</span></div>
-    <div class="tbl-wrap"><table id="adsets"></table></div>
-  </section>
-
-  <section class="card">
-    <div class="sec-h"><h2>Таблица по дням</h2><span class="hint">все цифры за период</span></div>
-    <div class="tbl-wrap"><table id="days"></table></div>
-  </section>
+    <div class="note" id="crm-note" hidden></div>
+  </div>
 
   <div class="foot" id="foot"></div>
-</div>
+</div></div>
 
 <script>
 let D=null, period='month';
 const $=id=>document.getElementById(id);
 const CUR={KZT:'₸',USD:'$',RUB:'₽'};
-const fmtN=n=>Math.round(n).toLocaleString('ru-RU');
-const money=n=>n==null||!isFinite(n)?'—':fmtN(n)+' '+(CUR[D.currency]||D.currency);
-const pct=(a,b)=>b?(a/b*100):null;
-const fp=v=>v==null?'—':(v>=10?v.toFixed(1):v.toFixed(2)).replace('.',',')+'%';
+const n0=n=>Math.round(n).toLocaleString('ru-RU');
+const money=n=>n==null||!isFinite(n)?'—':n0(n)+' '+(CUR[D.currency]||D.currency);
+const pct=(a,b)=>b?a/b*100:null;
+const fp=v=>v==null?'—':v.toFixed(1).replace('.',',')+'%';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MON=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-const dLabel=s=>{const [y,m,d]=s.split('-');return +d+' '+MON[m-1]};
+const MONF=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const dl=s=>{const [y,m,d]=s.split('-');return +d+' '+MON[m-1]};
+const dlf=s=>{const [y,m,d]=s.split('-');return +d+' '+MONF[m-1]+' '+y+' г.'};
 const iso=d=>d.toISOString().slice(0,10);
-const addDays=(s,n)=>{const d=new Date(s+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return iso(d)};
+const add=(s,n)=>{const d=new Date(s+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return iso(d)};
+const crmOn=()=>D.crm.type!=='none';
+const ST=()=>D.crm.stages||[];
 
 function range(p){
-  const t=D.today, [y,m]=t.split('-').map(Number);
-  if(p==='today') return [t,t,'Сегодня'];
-  if(p==='7') return [addDays(t,-6),t,'Последние 7 дней'];
-  if(p==='month') return [`${y}-${String(m).padStart(2,'0')}-01`,t,'Главное за месяц'];
-  const pm=m===1?12:m-1, py=m===1?y-1:y;
-  const last=new Date(Date.UTC(py,pm,0)).getUTCDate();
-  return [`${py}-${String(pm).padStart(2,'0')}-01`,`${py}-${String(pm).padStart(2,'0')}-${last}`,'Прошлый месяц'];
+  const t=D.today,[y,m]=t.split('-').map(Number),mm=String(m).padStart(2,'0');
+  if(p==='today') return [t,t,'Главное за сегодня'];
+  if(p==='7') return [add(t,-6),t,'Главное за 7 дней'];
+  if(p==='month') return [`${y}-${mm}-01`,t,'Главное за месяц'];
+  const pm=m===1?12:m-1,py=m===1?y-1:y,pp=String(pm).padStart(2,'0'),last=new Date(Date.UTC(py,pm,0)).getUTCDate();
+  return [`${py}-${pp}-01`,`${py}-${pp}-${last}`,'Главное за прошлый месяц'];
 }
-
-function dayMap(a,b){
+function days(a,b){
   const m={};
-  for(let d=a; d<=b; d=addDays(d,1)) m[d]={date:d,spend:0,impr:0,clicks:0,leads:0,crm:0,stages:(D.crm.stages||[]).map(()=>0),revenue:0};
-  for(const r of D.ads){ if(r.date<a||r.date>b) continue; const x=m[r.date]; x.spend+=r.spend;x.impr+=r.impressions;x.clicks+=r.clicks;x.leads+=r.leads; }
-  for(const [d,c] of Object.entries(D.crm_days||{})){ if(d<a||d>b||!m[d]) continue; const x=m[d]; x.crm+=c.crm_leads; c.stages.forEach((v,i)=>x.stages[i]+=v); x.revenue+=c.revenue; }
+  for(let d=a;d<=b;d=add(d,1)) m[d]={date:d,spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0};
+  for(const r of D.ads) if(m[r.date]){const x=m[r.date];x.spend+=r.spend;x.impr+=r.impressions;x.clicks+=r.clicks;x.leads+=r.leads}
+  for(const [d,c] of Object.entries(D.crm_days||{})) if(m[d]){c.stages.forEach((v,i)=>m[d].st[i]+=v);m[d].rev+=c.revenue}
   return Object.values(m);
 }
-function sum(rows){
-  const s={spend:0,impr:0,clicks:0,leads:0,crm:0,stages:(D.crm.stages||[]).map(()=>0),revenue:0};
-  rows.forEach(r=>{s.spend+=r.spend;s.impr+=r.impr;s.clicks+=r.clicks;s.leads+=r.leads;s.crm+=r.crm;r.stages.forEach((v,i)=>s.stages[i]+=v);s.revenue+=r.revenue});
+function total(rows){
+  const s={spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0};
+  rows.forEach(r=>{s.spend+=r.spend;s.impr+=r.impr;s.clicks+=r.clicks;s.leads+=r.leads;r.st.forEach((v,i)=>s.st[i]+=v);s.rev+=r.rev});
   return s;
 }
-function badge(kind){
-  const t={ok:'Норма',warn:'Внимание',bad:'Риск',none:'Мало данных'}[kind];
-  return `<span class="badge b-${kind}">${t}</span>`;
+const cpl=s=>s.leads?s.spend/s.leads:null;
+const stv=(s,i)=>crmOn()?n0(s.st[i]):'—';
+function tag(v,norm,higherBetter){
+  if(v==null) return '<span class="tag wait">'+(crmOn()?'Мало данных':'Ждёт CRM')+'</span>';
+  if(!norm) return '';
+  const ok=higherBetter?v>=norm:v<=norm;
+  return `<span class="tag ${ok?'ok':'bad'}">${ok?'Норма':'Риск'}</span>`;
 }
-const judgeLow=(v,norm)=>v==null||!norm?'none':v<=norm?'ok':v<=norm*1.3?'warn':'bad';
-const judgeHigh=(v,norm)=>v==null||!norm?'none':v>=norm?'ok':v>=norm*0.7?'warn':'bad';
 
 function render(){
-  const [a0,b,label]=range(period);
-  // дни до первого запуска рекламы не показываем, чтобы таблица и график не были пустыми
+  const [a0,b,cap]=range(period);
   const first=D.ads.reduce((m,r)=>r.date<m?r.date:m,'9999');
-  const a=first>a0&&first<=b?first:a0;
-  const rows=dayMap(a,b), s=sum(rows), hasCrm=D.crm.type!=='none', st=D.crm.stages||[];
-  const cpl=s.leads?s.spend/s.leads:null, ctr=pct(s.clicks,s.impr), cpm=s.impr?s.spend/s.impr*1000:null;
-  const sales=hasCrm?s.stages[st.length-1]:null;
-  const romi=hasCrm&&s.spend?(s.revenue-s.spend)/s.spend*100:null;
-  $('hero-label').textContent=label+(a0===b?' · '+dLabel(a0):' · '+dLabel(a0)+' — '+dLabel(b));
+  const a=first>a0&&first<=b?first:a0;          // пустые дни до запуска рекламы не показываем
+  const rows=days(a,b), s=total(rows), st=ST(), last=st.length-1, on=crmOn();
+  $('hero-cap').textContent=cap;
+  $('range').textContent=a0===b?dlf(a0):dlf(a0)+' — '+dlf(b);
 
-  const hk=[['Потрачено',money(s.spend),D.currency!=='USD'?'≈ $'+fmtN(s.spend/D.usd_rate):''],
-            ['Лиды с рекламы',fmtN(s.leads),'переписки и заявки'],
-            ['Цена лида',money(cpl),D.norms.cpl?'норма до '+money(D.norms.cpl):'']];
-  if(hasCrm) hk.push(['Заявки в CRM',fmtN(s.crm),''],['Продажи',fmtN(sales),''],['Выручка',money(s.revenue),romi==null?'':'ROMI '+Math.round(romi)+'%']);
-  $('hero').innerHTML=hk.map(([l,v,x])=>`<div class="hk"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
-  const bud=Object.values(D.budgets||{}).reduce((x,y)=>x+y,0);
-  $('hero-note').textContent=bud?`Сейчас в работе ${Object.keys(D.budgets).length} групп, дневной бюджет ${money(bud)}`:'Активных групп сейчас нет';
+  const paid=on?s.st[last]:null, romi=on&&s.spend?(s.rev-s.spend)/s.spend*100:null;
+  $('hero').innerHTML=[
+    ['Потрачено',money(s.spend),D.currency!=='USD'?'≈ $'+n0(s.spend/D.usd_rate):''],
+    ['Лиды',n0(s.leads),'цена лида '+money(cpl(s))],
+    ['Оплачено',on?n0(paid):'—',on?money(s.rev)+(romi==null?'':' · ROMI '+Math.round(romi)+'%'):'после подключения CRM'],
+  ].map(([l,v,x])=>`<div class="ht"><div class="cap">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
+  const P=D.plan||{}, isMonth=period==='month';
+  const pb=(l,v,p,fmt)=>`<div class="pl"><div class="row"><span>${l}</span><span class="num">${fmt(v)} / ${isMonth&&p?fmt(p):'—'}</span></div><div class="bar"><i style="width:${isMonth&&p?Math.min(100,v/p*100):0}%"></i></div></div>`;
+  $('plan').innerHTML=pb('Бюджет',s.spend,P.budget_month,money)+pb('Лиды',s.leads,P.leads_month,n0);
 
-  const fr=[['Показы',fmtN(s.impr),cpm?'CPM '+money(cpm):''],['Клики',fmtN(s.clicks),'CTR '+fp(ctr)],['Лиды с рекламы',fmtN(s.leads),'клик → лид '+fp(pct(s.leads,s.clicks))]];
-  if(hasCrm){
-    fr.push(['Заявки в CRM',fmtN(s.crm),'дошло из лидов '+fp(pct(s.crm,s.leads))]);
-    let prev=s.crm; st.forEach((n,i)=>{fr.push([n,fmtN(s.stages[i]),'конверсия '+fp(pct(s.stages[i],prev))]);prev=s.stages[i]});
-  }
-  $('funnel').innerHTML=fr.map(([l,v,x])=>`<div class="funnel-row"><div><div class="l">${l}</div><div class="s">${x}</div></div><div class="v num">${v}</div></div>`).join('')+
-    (hasCrm?'':'<div class="crm-empty">CRM пока не подключена. Когда подключим amoCRM, здесь появятся заявки, встречи, продажи и выручка.</div>');
-
-  const k=[['Цена лида',money(cpl),D.norms.cpl?'норма до '+money(D.norms.cpl):'',judgeLow(s.leads>=3?cpl:null,D.norms.cpl)],
-           ['CTR по ссылке',fp(ctr),D.norms.ctr?'норма от '+fp(D.norms.ctr):'',judgeHigh(s.impr>=1000?ctr:null,D.norms.ctr)],
-           ['CPM',money(cpm),'цена 1000 показов','none'],
-           ['Клик → лид',fp(pct(s.leads,s.clicks)),'сколько кликнувших написали','none']];
-  if(hasCrm){
-    k[2]=['Лид → '+st[0].toLowerCase(),fp(pct(s.stages[0],s.crm)),D.norms.lead_to_stage1?'норма от '+fp(D.norms.lead_to_stage1):'',judgeHigh(s.crm>=10?pct(s.stages[0],s.crm):null,D.norms.lead_to_stage1)];
-    k[3]=['ROMI',romi==null?'—':Math.round(romi)+'%','выручка к расходу',romi==null?'none':romi>=0?'ok':'bad'];
-  }
-  $('kpis').innerHTML=k.map(([l,v,x,j])=>`<div class="card kpi"><div class="top"><span class="eyebrow">${l}</span>${badge(j)}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
-
-  drawChart(rows);
-  $('chart-hint').textContent=rows.length+' дн.';
-  renderWeeks(); renderAdsets(a,b); renderDays(rows,s,hasCrm,st);
-}
-
-function drawChart(rows){
-  const svg=$('chart'), W=svg.clientWidth||800, H=220, pl=8, pr=8, pt=14, pb=26;
-  const n=rows.length, mx=Math.max(1,...rows.map(r=>r.spend)), ml=Math.max(1,...rows.map(r=>r.leads));
-  const bw=(W-pl-pr)/n, y=v=>pt+(H-pt-pb)*(1-v/mx), yl=v=>pt+(H-pt-pb)*(1-v/ml);
-  let g='';
-  rows.forEach((r,i)=>{const x=pl+i*bw, h=H-pb-y(r.spend);
-    g+=`<rect x="${x+bw*.15}" y="${y(r.spend)}" width="${Math.max(1,bw*.7)}" height="${Math.max(0,h)}" rx="3" fill="var(--bar)"><title>${dLabel(r.date)}: ${money(r.spend)}, лидов ${r.leads}</title></rect>`;
-    if(n<=16||i%Math.ceil(n/10)===0) g+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${dLabel(r.date)}</text>`;
+  let fr=`<div class="fr"><div><div class="l">Лиды с рекламы</div><div class="s">CPL ${money(cpl(s))}</div></div><div class="v num">${n0(s.leads)}</div></div>`;
+  let prev=s.leads;
+  st.forEach((x,i)=>{
+    const v=on?s.st[i]:null;
+    fr+=`<div class="fr ${on?'':'wait'}"><div><div class="l">${esc(x.label)}</div><div class="s">${on?'конверсия '+fp(pct(v,prev)):'ждёт подключения CRM'}</div></div><div class="v num">${on?n0(v):'—'}</div></div>`;
+    if(on) prev=v;
   });
-  const pts=rows.map((r,i)=>`${pl+i*bw+bw/2},${yl(r.leads)}`).join(' ');
-  g+=`<polyline points="${pts}" fill="none" stroke="var(--ok)" stroke-width="2"/>`;
-  rows.forEach((r,i)=>{ if(r.leads) g+=`<circle cx="${pl+i*bw+bw/2}" cy="${yl(r.leads)}" r="3.5" fill="var(--ok)"/><text x="${pl+i*bw+bw/2}" y="${yl(r.leads)-7}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ok)">${r.leads}</text>`});
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=g;
-}
+  $('funnel').innerHTML=fr;
 
-function renderWeeks(){
-  const t=D.today, dow=(new Date(t+'T00:00:00Z').getUTCDay()+6)%7, mon=addDays(t,-dow);
-  let h='';
-  for(let w=0;w<4;w++){
-    const a=addDays(mon,-7*w), b=w===0?t:addDays(a,6), s=sum(dayMap(a,b));
-    const cpl=s.leads?s.spend/s.leads:null;
-    h+=`<div class="week"><div class="d">${dLabel(a)} — ${dLabel(b)}</div><div class="g">
-      <div><span>Расход</span><b class="num">${money(s.spend)}</b></div><div><span>Лиды</span><b class="num">${fmtN(s.leads)}</b></div>
-      <div><span>Цена лида</span><b class="num">${money(cpl)}</b></div><div><span>CTR</span><b class="num">${fp(pct(s.clicks,s.impr))}</b></div>
-      ${D.crm.type!=='none'?`<div><span>Заявки CRM</span><b class="num">${fmtN(s.crm)}</b></div><div><span>Продажи</span><b class="num">${fmtN(s.stages[s.stages.length-1])}</b></div>`:''}
+  const N=D.norms||{}, i1=st.findIndex(x=>/зум/i.test(x.label)), i2=i1+1, ic=st.length-2;
+  const k=[
+    ['Цена лида',money(cpl(s)),N.cpl?'норма до '+money(N.cpl):'',tag(s.leads?cpl(s):null,N.cpl,false)],
+    ['Лид → зум',on?fp(pct(s.st[i1],s.leads)):'—',N.lead_to_zoom?'норма от '+N.lead_to_zoom+'%':'',tag(on&&s.leads?pct(s.st[i1],s.leads):null,N.lead_to_zoom,true)],
+    ['Доходимость зума',on?fp(pct(s.st[i2],s.st[i1])):'—',N.zoom_show?'норма от '+N.zoom_show+'%':'',tag(on&&s.st[i1]?pct(s.st[i2],s.st[i1]):null,N.zoom_show,true)],
+    ['Договор → оплата',on?fp(pct(s.st[last],s.st[ic])):'—',N.contract_to_paid?'норма от '+N.contract_to_paid+'%':'',tag(on&&s.st[ic]?pct(s.st[last],s.st[ic]):null,N.contract_to_paid,true)],
+  ];
+  $('kpis').innerHTML=k.map(([l,v,x,t])=>`<div class="kpi"><div class="t"><span class="cap">${l}</span>${t}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
+
+  // таблица: метрики строками, дни колонками, как в РНП
+  const cols=[s,...[...rows].reverse()], heads=['Итого',...[...rows].reverse().map(r=>dl(r.date))];
+  const line=(name,f,cls='')=>`<tr class="${cls}"><td>${name}</td>${cols.map((c,j)=>{const v=f(c);return `<td class="num ${j?'':'tot'} ${v==='0'||v==='—'||v==='0 ₸'?'z':''}">${v}</td>`}).join('')}</tr>`;
+  let t='<thead><tr><th>Метрика</th>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  t+=line('Расход',c=>money(c.spend));
+  t+=line('Лиды',c=>n0(c.leads));
+  t+=line('Цена лида',c=>money(cpl(c)));
+  st.forEach((x,i)=>{
+    t+=line(esc(x.label),c=>stv(c,i));
+    const base=i===0?c=>c.leads:c=>c.st[i-1];
+    t+=line('конверсия',c=>on?fp(pct(c.st[i],base(c))):'—','sub');
+  });
+  t+=line('Сумма оплат',c=>on?money(c.rev):'—');
+  t+=line('ROMI',c=>on&&c.spend?Math.round((c.rev-c.spend)/c.spend*100)+'%':'—');
+  $('days').innerHTML=t+'</tbody>';
+
+  const dow=(new Date(D.today+'T00:00:00Z').getUTCDay()+6)%7, mon=add(D.today,-dow);
+  let w='';
+  for(let i=0;i<3;i++){
+    const wa=add(mon,-7*i), wb=i===0?D.today:add(wa,6), x=total(days(wa,wb));
+    w+=`<div class="wk"><div class="d">${dl(wa)} — ${dl(wb)}</div><div class="g">
+      <div><span class="cap">Расход</span><b class="num">${money(x.spend)}</b></div>
+      <div><span class="cap">Лиды</span><b class="num">${n0(x.leads)}</b></div>
+      <div><span class="cap">CPL</span><b class="num">${money(cpl(x))}</b></div>
+      <div><span class="cap">Зумы проведены</span><b class="num">${on?n0(x.st[i2])+' · '+fp(pct(x.st[i2],x.leads)):'—'}</b></div>
     </div></div>`;
   }
-  $('weeks').innerHTML=h;
+  $('weeks').innerHTML=w;
+  $('crm-note').hidden=on;
+  $('crm-note').textContent='Зумы, договоры и оплаты подтянутся из amoCRM автоматически, как только подключим доступ. Сейчас на странице только реклама.';
 }
 
-function renderAdsets(a,b){
-  const m={};
-  for(const r of D.ads){ if(r.date<a||r.date>b) continue;
-    const x=m[r.adset_id]||(m[r.adset_id]={name:r.adset,camp:r.campaign,spend:0,impr:0,clicks:0,leads:0,on:!!(D.budgets||{})[r.adset_id]});
-    x.spend+=r.spend;x.impr+=r.impressions;x.clicks+=r.clicks;x.leads+=r.leads; }
-  const rows=Object.values(m).sort((p,q)=>(p.leads?p.spend/p.leads:1e12)-(q.leads?q.spend/q.leads:1e12)||q.spend-p.spend);
-  if(!rows.length){$('adsets').innerHTML='<tr><td class="dim">За период рекламы не было</td></tr>';return}
-  $('adsets').innerHTML='<thead><tr><th>Кампания · группа</th><th>Расход</th><th>Показы</th><th>CTR</th><th>Лиды</th><th>Цена лида</th><th></th></tr></thead><tbody>'+
-    rows.map(r=>{const cpl=r.leads?r.spend/r.leads:null;
-      const j=r.leads?judgeLow(cpl,D.norms.cpl):(D.norms.cpl&&r.spend>=D.norms.cpl*2?'bad':'none');
-      return `<tr><td><span class="dot ${r.on?'st-on':'st-off'}" title="${r.on?'работает':'выключена'}"></span>${esc(r.camp.replace(/.*\|\|\s*(\S+)\s*$/,'К$1'))} · ${esc(r.name)}</td><td class="num">${money(r.spend)}</td><td class="num">${fmtN(r.impr)}</td><td class="num">${fp(pct(r.clicks,r.impr))}</td><td class="num">${r.leads}</td><td class="num">${money(cpl)}</td><td>${badge(j)}</td></tr>`}).join('')+'</tbody>';
-}
-
-function renderDays(rows,s,hasCrm,st){
-  const hd=['Дата','Расход','Показы','CTR','Лиды','Цена лида'].concat(hasCrm?['Заявки CRM',...st,'Выручка']:[]);
-  const line=(r,label,cls='')=>{const cpl=r.leads?r.spend/r.leads:null;
-    const c=[label,money(r.spend),fmtN(r.impr),fp(pct(r.clicks,r.impr)),fmtN(r.leads),money(cpl)];
-    if(hasCrm) c.push(fmtN(r.crm),...r.stages.map(fmtN),money(r.revenue));
-    return `<tr class="${cls}">${c.map((v,i)=>`<td class="${i?'num':''}${!r.spend&&!r.leads&&!r.crm&&i?' dim':''}">${v}</td>`).join('')}</tr>`};
-  $('days').innerHTML='<thead><tr>'+hd.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>'+
-    line(s,'Итого','total')+[...rows].reverse().map(r=>line(r,dLabel(r.date))).join('')+'</tbody>';
-}
-
-async function load(manual){
+async function load(){
   const btn=$('refresh'); btn.disabled=true; btn.textContent='Обновляю…';
   try{
     const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     D=await r.json();
-    document.title=D.title+' · аналитика';
-    $('title').textContent=D.title; $('subtitle').textContent=D.subtitle||'';
-    $('logo').textContent=D.title.split(/[\s·]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
-    const u=new Date(D.updated_at), mins=Math.round((Date.now()-u)/60000);
-    $('updated').textContent='Данные на '+u.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+
-      (mins>1?` (${mins<60?mins+' мин':Math.round(mins/60)+' ч'} назад)`:'')+' · обновляются автоматически каждые 15 минут';
-    $('foot').textContent=D.currency!=='USD'?`Расход пересчитан из долларов по курсу Нацбанка ${D.usd_rate.toString().replace('.',',')} ₸. Лид — начатая переписка в WhatsApp или заявка.`:'';
+    document.title=(D.brand||'Проект')+' · аналитика';
+    $('brand').textContent=D.brand||''; $('title').textContent=D.title;
+    $('logo').textContent=(D.brand||'').split('·')[0].trim();
+    const u=new Date(D.updated_at);
+    $('conn').textContent='Meta ✓ · '+(crmOn()?'amoCRM ✓':'amoCRM —');
+    $('foot').textContent='Обновлено '+u.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+
+      ' · автообновление каждые 15 минут'+(D.currency!=='USD'?' · расход по курсу Нацбанка '+String(D.usd_rate).replace('.',',')+' ₸':'')+' · лид = начатая переписка в WhatsApp';
     $('err').style.display='none';
     render();
-  }catch(e){ $('err').style.display='block'; $('err').textContent='Не получилось загрузить данные: '+e.message; }
-  btn.disabled=false; btn.textContent='↻ Обновить';
+  }catch(e){$('err').style.display='block';$('err').textContent='Не получилось загрузить данные: '+e.message}
+  btn.disabled=false; btn.textContent='Обновить';
 }
-document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{period=c.dataset.p;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c));render()});
-$('refresh').onclick=()=>load(true);
-window.addEventListener('resize',()=>D&&render());
-load();
-setInterval(load,5*60*1000);
+document.querySelectorAll('.periods button').forEach(b=>b.onclick=()=>{period=b.dataset.p;document.querySelectorAll('.periods button').forEach(x=>x.setAttribute('aria-pressed',x===b));render()});
+$('refresh').onclick=load;
+load(); setInterval(load,5*60*1000);
 </script>
 </body>
 </html>

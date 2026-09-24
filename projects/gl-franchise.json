@@ -1,30 +1,73 @@
 {
   "slug": "gl-franchise-8t8ddwuw7whc",
-  "title": "GL Study · Франшиза",
-  "subtitle": "Ежедневная аналитика проекта",
+  "title": "Ежедневная аналитика проекта",
   "timezone": "Asia/Almaty",
   "currency": "KZT",
   "meta": {
-    "accounts": ["act_785057740483335"],
-    "campaign_filter": ["GL Франшизы"]
+    "accounts": [
+      "act_785057740483335"
+    ],
+    "campaign_filter": [
+      "GL Франшизы"
+    ]
   },
   "crm": {
     "type": "none",
     "amo": {
-      "domain": "",
+      "domain": "abroadgrandluxekz.amocrm.ru",
       "token_env": "AMO_TOKEN_GL_FRANCHISE",
-      "pipeline_id": null,
+      "pipeline_id": 10180614,
       "stages": [
-        {"key": "qualified", "label": "Квалифицирован", "status_ids": []},
-        {"key": "meeting", "label": "Встреча", "status_ids": []},
-        {"key": "sale", "label": "Продажа", "status_ids": [142]}
+        {
+          "key": "zoom1_set",
+          "label": "Назначили зум",
+          "short": "Зум назначен",
+          "status_ids": []
+        },
+        {
+          "key": "zoom1_done",
+          "label": "Проведено зумов",
+          "short": "Зум проведён",
+          "status_ids": []
+        },
+        {
+          "key": "zoom2_set",
+          "label": "Назначили второй зум",
+          "short": "2-й зум назначен",
+          "status_ids": []
+        },
+        {
+          "key": "zoom2_done",
+          "label": "Проведено вторых зумов",
+          "short": "2-й зум проведён",
+          "status_ids": []
+        },
+        {
+          "key": "contract",
+          "label": "Подписываем договор",
+          "short": "Договор",
+          "status_ids": []
+        },
+        {
+          "key": "paid",
+          "label": "Оплачено",
+          "short": "Оплата",
+          "status_ids": [
+            142
+          ]
+        }
       ]
     }
   },
   "norms": {
     "cpl": 1800,
-    "ctr": 0.8,
-    "lead_to_stage1": 30,
-    "stage_to_stage": 30
+    "lead_to_zoom": 25,
+    "zoom_show": 70,
+    "contract_to_paid": 50
+  },
+  "brand": "GL STUDY · ФРАНШИЗА",
+  "plan": {
+    "budget_month": null,
+    "leads_month": null
   }
 }

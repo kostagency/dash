@@ -99,9 +99,9 @@ def meta_rows(cfg, since, until):
     rows = []
     for acc in cfg["meta"]["accounts"]:
         data = graph(f"{acc}/insights", {
-            "level": "adset", "time_increment": 1, "limit": 500,
+            "level": "campaign", "time_increment": 1, "limit": 500,
             "time_range": json.dumps({"since": since.isoformat(), "until": until.isoformat()}),
-            "fields": "campaign_id,campaign_name,adset_id,adset_name,spend,impressions,clicks,inline_link_clicks,actions",
+            "fields": "campaign_id,campaign_name,spend,impressions,clicks,inline_link_clicks,actions",
         })
         for d in data:
             if flt and not any(f in d["campaign_name"].lower() for f in flt):
@@ -109,8 +109,6 @@ def meta_rows(cfg, since, until):
             rows.append({
                 "date": d["date_start"],
                 "campaign": d["campaign_name"],
-                "adset": d["adset_name"],
-                "adset_id": d["adset_id"],
                 "spend_usd": float(d.get("spend", 0)),
                 "impressions": int(d.get("impressions", 0)),
                 "clicks": int(d.get("inline_link_clicks") or d.get("clicks") or 0),
@@ -196,22 +194,23 @@ def build(path):
     status = meta_status(cfg)
     for r in ads:
         r["spend"] = round(r.pop("spend_usd") * rate, 2)
-        st = status.get(r["adset_id"], {})
-        r["status"] = st.get("status", "")
 
     crm_type = cfg.get("crm", {}).get("type", "none")
     crm = CRM[crm_type](cfg, since, today, tz) if crm_type in CRM else None
 
     data = {
+        "brand": cfg.get("brand", ""),
         "title": cfg["title"],
-        "subtitle": cfg.get("subtitle", ""),
+        "plan": cfg.get("plan", {}),
         "currency": cfg.get("currency", "USD"),
         "usd_rate": rate,
         "updated_at": datetime.now(tz).isoformat(timespec="minutes"),
         "today": today.isoformat(),
         "norms": cfg.get("norms", {}),
+        # этапы показываем всегда, даже пока CRM не подключена: страница рисует их с прочерками
         "crm": {"type": crm_type if crm is not None else "none",
-                "stages": [s["label"] for s in cfg.get("crm", {}).get(crm_type, {}).get("stages", [])] if crm is not None else []},
+                "stages": [{"label": s["label"], "short": s.get("short", s["label"])}
+                           for s in cfg.get("crm", {}).get("amo", {}).get("stages", [])]},
         "ads": ads,
         "crm_days": crm or {},
         "budgets": {k: v["daily_budget_usd"] * rate for k, v in status.items() if v["status"] == "ACTIVE"},

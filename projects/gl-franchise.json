@@ -1,0 +1,30 @@
+{
+  "slug": "gl-franchise-8t8ddwuw7whc",
+  "title": "GL Study · Франшиза",
+  "subtitle": "Ежедневная аналитика проекта",
+  "timezone": "Asia/Almaty",
+  "currency": "KZT",
+  "meta": {
+    "accounts": ["act_785057740483335"],
+    "campaign_filter": ["GL Франшизы"]
+  },
+  "crm": {
+    "type": "none",
+    "amo": {
+      "domain": "",
+      "token_env": "AMO_TOKEN_GL_FRANCHISE",
+      "pipeline_id": null,
+      "stages": [
+        {"key": "qualified", "label": "Квалифицирован", "status_ids": []},
+        {"key": "meeting", "label": "Встреча", "status_ids": []},
+        {"key": "sale", "label": "Продажа", "status_ids": [142]}
+      ]
+    }
+  },
+  "norms": {
+    "cpl": 1800,
+    "ctr": 0.8,
+    "lead_to_stage1": 30,
+    "stage_to_stage": 30
+  }
+}

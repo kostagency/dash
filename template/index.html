@@ -144,7 +144,7 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
   <div class="kpis" id="kpis"></div>
 
   <div class="box">
-    <div class="h"><div class="cap">Динамика по дням</div><span class="hint">сначала итог периода, дальше дни от свежих к старым</span></div>
+    <div class="h"><div class="cap">Динамика по дням</div><span class="hint">итог периода, дальше дни по порядку</span></div>
     <div class="scroll"><table id="days"></table></div>
   </div>
 
@@ -241,7 +241,7 @@ function render(){
   $('kpis').innerHTML=k.map(([l,v,x,t])=>`<div class="kpi"><div class="t"><span class="cap">${l}</span>${t}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
 
   // таблица: метрики строками, дни колонками, как в РНП
-  const cols=[s,...[...rows].reverse()], heads=['Итого',...[...rows].reverse().map(r=>dl(r.date))];
+  const cols=[s,...rows], heads=['Итого',...rows.map(r=>dl(r.date))];
   const line=(name,f,cls='')=>`<tr class="${cls}"><td>${name}</td>${cols.map((c,j)=>{const v=f(c);return `<td class="num ${j?'':'tot'} ${v==='0'||v==='—'||v==='0 ₸'?'z':''}">${v}</td>`}).join('')}</tr>`;
   let t='<thead><tr><th>Метрика</th>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
   t+=line('Расход',c=>money(c.spend));

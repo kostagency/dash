@@ -45,6 +45,9 @@ h1{margin:3px 0 0;font-size:21px;font-weight:800;letter-spacing:-.01em}
 .pill.ghost{background:transparent;color:var(--muted);font-weight:700}
 .periods{display:flex;gap:2px;background:var(--soft);border-radius:999px;padding:3px}
 .periods button{border:0;background:transparent;color:var(--muted);font:800 11px Manrope,sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer}
+.custom{display:inline-flex;gap:6px;align-items:center;font-size:11px;font-weight:800;color:var(--muted)}
+.custom[hidden]{display:none}
+.custom input{font:700 12px Manrope,sans-serif;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 10px;margin-left:4px;color-scheme:light dark}
 .periods button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
 /* главное + воронка */
@@ -121,8 +124,12 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
     <div class="pills">
       <span class="pill dark" id="conn">Подключения</span>
       <div class="periods" role="group" aria-label="Период">
-        <button data-p="today">Сегодня</button><button data-p="7">7 дней</button><button data-p="month" aria-pressed="true">Месяц</button><button data-p="prev">Прошлый</button>
+        <button data-p="today">Сегодня</button><button data-p="7">7 дней</button><button data-p="month" aria-pressed="true">Месяц</button><button data-p="prev">Прошлый</button><button data-p="custom">Свой период</button>
       </div>
+      <span class="custom" id="custom" hidden>
+        <label>с <input type="date" id="d-from"></label>
+        <label>по <input type="date" id="d-to"></label>
+      </span>
       <button class="pill blue" id="refresh">Обновить</button>
       <span class="pill ghost num" id="range"></span>
     </div>
@@ -177,6 +184,7 @@ const ST=()=>D.crm.stages||[];
 
 function range(p){
   const t=D.today,[y,m]=t.split('-').map(Number),mm=String(m).padStart(2,'0');
+  if(p==='custom'){const f=$('d-from').value||t, to=$('d-to').value||t; return f<=to?[f,to,'Главное за период']:[to,f,'Главное за период']}
   if(p==='today') return [t,t,'Главное за сегодня'];
   if(p==='7') return [add(t,-6),t,'Главное за 7 дней'];
   if(p==='month') return [`${y}-${mm}-01`,t,'Главное за месяц'];
@@ -289,13 +297,22 @@ async function load(){
     $('foot').textContent='Обновлено '+u.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+
       ' · автообновление каждые 15 минут'+(D.currency!=='USD'?' · расход по курсу Нацбанка '+String(D.usd_rate).replace('.',',')+' ₸':'')+' · лид = начатая переписка в WhatsApp';
     $('err').style.display='none';
+    const minD=D.start_date||D.ads.reduce((m,r)=>r.date<m?r.date:m,D.today);
+    ['d-from','d-to'].forEach(id=>{$(id).min=minD;$(id).max=D.today});
     const pb=document.querySelector('.periods [data-p="prev"]');
     pb.hidden=!!D.start_date&&D.start_date>=D.today.slice(0,8)+'01';
     render();
   }catch(e){$('err').style.display='block';$('err').textContent='Не получилось загрузить данные: '+e.message}
   btn.disabled=false; btn.textContent='Обновить';
 }
-document.querySelectorAll('.periods button').forEach(b=>b.onclick=()=>{period=b.dataset.p;document.querySelectorAll('.periods button').forEach(x=>x.setAttribute('aria-pressed',x===b));render()});
+document.querySelectorAll('.periods button').forEach(b=>b.onclick=()=>{
+  period=b.dataset.p;
+  document.querySelectorAll('.periods button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('custom').hidden=period!=='custom';
+  if(period==='custom'&&!$('d-from').value){const [a,z]=range('month');$('d-from').value=D.start_date&&D.start_date>a?D.start_date:a;$('d-to').value=z}
+  render();
+});
+['d-from','d-to'].forEach(id=>$(id).onchange=()=>render());
 $('refresh').onclick=load;
 load(); setInterval(load,5*60*1000);
 </script>

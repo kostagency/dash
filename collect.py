@@ -216,7 +216,8 @@ def build(path):
     cfg = json.load(open(path))
     tz = ZoneInfo(cfg.get("timezone", "Asia/Almaty"))
     today = datetime.now(tz).date()
-    since = (today.replace(day=1) - timedelta(days=1)).replace(day=1)  # начало прошлого месяца
+    # история для выбора любого периода: с даты старта проекта, но не глубже полугода
+    since = today - timedelta(days=183)
     if cfg.get("start_date"):
         # проект считается с даты старта: всё, что было раньше, в отчёт не попадает
         since = max(since, date.fromisoformat(cfg["start_date"]))

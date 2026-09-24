@@ -79,5 +79,6 @@
   "plan": {
     "budget_month": null,
     "leads_month": null
-  }
+  },
+  "start_date": "2026-09-24"
 }

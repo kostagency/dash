@@ -217,6 +217,9 @@ def build(path):
     tz = ZoneInfo(cfg.get("timezone", "Asia/Almaty"))
     today = datetime.now(tz).date()
     since = (today.replace(day=1) - timedelta(days=1)).replace(day=1)  # начало прошлого месяца
+    if cfg.get("start_date"):
+        # проект считается с даты старта: всё, что было раньше, в отчёт не попадает
+        since = max(since, date.fromisoformat(cfg["start_date"]))
     print(f"{cfg['slug']}: {since} .. {today}")
 
     rate = usd_rate(cfg.get("currency", "USD"))
@@ -236,6 +239,7 @@ def build(path):
         "usd_rate": rate,
         "updated_at": datetime.now(tz).isoformat(timespec="minutes"),
         "today": today.isoformat(),
+        "start_date": since.isoformat() if cfg.get("start_date") else None,
         "norms": cfg.get("norms", {}),
         # этапы показываем всегда, даже пока CRM не подключена: страница рисует их с прочерками
         "crm": {"type": crm_type if crm is not None else "none",

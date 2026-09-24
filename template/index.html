@@ -149,7 +149,7 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
   </div>
 
   <div class="box">
-    <div class="h"><div class="cap">По неделям</div><span class="hint">текущая и две прошлые</span></div>
+    <div class="h"><div class="cap">По неделям</div><span class="hint">с начала проекта</span></div>
     <div class="weeks" id="weeks"></div>
     <div class="note" id="crm-note" hidden></div>
   </div>
@@ -206,8 +206,8 @@ function tag(v,norm,higherBetter){
 
 function render(){
   const [a0,b,cap]=range(period);
-  const first=[...D.ads.filter(r=>r.spend||r.leads).map(r=>r.date),...Object.keys(D.crm_days||{})].reduce((m,d)=>d<m?d:m,'9999');
-  const a=first>a0&&first<=b?first:a0;          // пустые дни до запуска рекламы не показываем
+  const first=D.start_date||[...D.ads.filter(r=>r.spend||r.leads).map(r=>r.date),...Object.keys(D.crm_days||{})].reduce((m,d)=>d<m?d:m,'9999');
+  const a=first>a0&&first<=b?first:a0;          // дни до старта проекта не показываем
   const rows=days(a,b), s=total(rows), st=ST(), last=st.length-1, on=crmOn();
   $('hero-cap').textContent=cap;
   $('range').textContent=a0===b?dlf(a0):dlf(a0)+' — '+dlf(b);
@@ -259,7 +259,10 @@ function render(){
   const dow=(new Date(D.today+'T00:00:00Z').getUTCDay()+6)%7, mon=add(D.today,-dow);
   let w='';
   for(let i=0;i<3;i++){
-    const wa=add(mon,-7*i), wb=i===0?D.today:add(wa,6), x=total(days(wa,wb));
+    let wa=add(mon,-7*i); const wb=i===0?D.today:add(wa,6);
+    if(D.start_date&&wb<D.start_date) break;
+    if(D.start_date&&wa<D.start_date) wa=D.start_date;
+    const x=total(days(wa,wb));
     w+=`<div class="wk"><div class="d">${dl(wa)} — ${dl(wb)}</div><div class="g">
       <div><span class="cap">Расход</span><b class="num">${money(x.spend)}</b></div>
       <div><span class="cap">Лиды</span><b class="num">${n0(x.leads)}</b></div>
@@ -286,6 +289,8 @@ async function load(){
     $('foot').textContent='Обновлено '+u.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+
       ' · автообновление каждые 15 минут'+(D.currency!=='USD'?' · расход по курсу Нацбанка '+String(D.usd_rate).replace('.',',')+' ₸':'')+' · лид = начатая переписка в WhatsApp';
     $('err').style.display='none';
+    const pb=document.querySelector('.periods [data-p="prev"]');
+    pb.hidden=!!D.start_date&&D.start_date>=D.today.slice(0,8)+'01';
     render();
   }catch(e){$('err').style.display='block';$('err').textContent='Не получилось загрузить данные: '+e.message}
   btn.disabled=false; btn.textContent='Обновить';

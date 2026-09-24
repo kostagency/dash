@@ -22,31 +22,41 @@
           "key": "zoom1_set",
           "label": "Назначили зум",
           "short": "Зум назначен",
-          "status_ids": []
+          "status_ids": [
+            80628234
+          ]
         },
         {
           "key": "zoom1_done",
           "label": "Проведено зумов",
           "short": "Зум проведён",
-          "status_ids": []
+          "status_ids": [
+            80628242
+          ]
         },
         {
           "key": "zoom2_set",
           "label": "Назначили второй зум",
           "short": "2-й зум назначен",
-          "status_ids": []
+          "status_ids": [
+            80627954
+          ]
         },
         {
           "key": "zoom2_done",
           "label": "Проведено вторых зумов",
           "short": "2-й зум проведён",
-          "status_ids": []
+          "status_ids": [
+            82199314
+          ]
         },
         {
           "key": "contract",
           "label": "Подписываем договор",
           "short": "Договор",
-          "status_ids": []
+          "status_ids": [
+            86963422
+          ]
         },
         {
           "key": "paid",

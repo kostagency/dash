@@ -154,31 +154,56 @@ def amo_rows(cfg, since, until, tz):
 
     t0 = int(datetime.combine(since, datetime.min.time(), tz).timestamp())
     t1 = int(datetime.combine(until + timedelta(days=1), datetime.min.time(), tz).timestamp())
-    leads, page = [], 1
-    while True:
-        q = urllib.parse.urlencode({"filter[pipeline_id]": a["pipeline_id"], "filter[created_at][from]": t0,
-                                    "filter[created_at][to]": t1, "limit": 250, "page": page})
-        r = http_json(base + "leads?" + q, hdr)
-        batch = r.get("_embedded", {}).get("leads", [])
-        leads += batch
-        if len(batch) < 250:
-            break
-        page += 1
+
+    def pages(path, params, key):
+        out, page = [], 1
+        while True:
+            r = http_json(base + path + "?" + urllib.parse.urlencode(dict(params, limit=250 if key == "leads" else 100, page=page)), hdr)
+            batch = r.get("_embedded", {}).get(key, [])
+            out += batch
+            if not r.get("_links", {}).get("next"):
+                return out
+            page += 1
 
     days = defaultdict(lambda: {"crm_leads": 0, "stages": [0] * len(stages), "revenue": 0})
-    for l in leads:
-        d = datetime.fromtimestamp(l["created_at"], tz).date().isoformat()
-        row = days[d]
-        row["crm_leads"] += 1
-        sid, won = l["status_id"], l["status_id"] == 142
-        cur = order.get(sid, -1)
-        for i, st in enumerate(stages):
-            # когорта по дате создания: сделка «дошла» до этапа, если сейчас на нём или дальше.
-            # Закрытые неуспешные (143) считаем только как заявку, до какого этапа дошли, v1 не знает.
-            if won or sid in st["status_ids"] or (sid != 143 and cur >= stage_sort[i]):
-                row["stages"][i] += 1
-        if won:
-            row["revenue"] += l.get("price") or 0
+    day = lambda ts: datetime.fromtimestamp(ts, tz).date().isoformat()
+
+    # заявки: сделки воронки, созданные за период
+    for l in pages("leads", {"filter[pipeline_id]": a["pipeline_id"],
+                             "filter[created_at][from]": t0, "filter[created_at][to]": t1}, "leads"):
+        days[day(l["created_at"])]["crm_leads"] += 1
+
+    # этапы: по истории смены статусов. Сделка попадает в этап в тот день, когда впервые
+    # перешла его порог (перескок через этапы засчитывает все пройденные). Уход в «не реализованные» не считается.
+    events = pages("events", {"filter[type]": "lead_status_changed", "filter[entity]": "lead",
+                              "filter[created_at][from]": t0, "filter[created_at][to]": t1}, "events")
+    events.sort(key=lambda e: e["created_at"])
+    seen, won = set(), {}
+    for e in events:
+        try:
+            before = e["value_before"][0]["lead_status"]
+            after = e["value_after"][0]["lead_status"]
+        except (KeyError, IndexError, TypeError):
+            continue
+        if after.get("pipeline_id") != a["pipeline_id"] or after["id"] == 143:
+            continue
+        s_from = order.get(before["id"], -1) if before.get("pipeline_id") == a["pipeline_id"] else -1
+        s_to = order.get(after["id"], -1)
+        for i, thr in enumerate(stage_sort):
+            if s_from < thr <= s_to and (e["entity_id"], i) not in seen:
+                seen.add((e["entity_id"], i))
+                days[day(e["created_at"])]["stages"][i] += 1
+        if after["id"] == 142:
+            won[e["entity_id"]] = day(e["created_at"])
+
+    # выручка: бюджет выигранных сделок в день выигрыша
+    ids = list(won)
+    for i in range(0, len(ids), 50):
+        q = [("filter[id][]", x) for x in ids[i:i + 50]] + [("limit", 250)]
+        r = http_json(base + "leads?" + urllib.parse.urlencode(q), hdr)
+        for l in r.get("_embedded", {}).get("leads", []):
+            days[won[l["id"]]]["revenue"] += l.get("price") or 0
+    print(f"  amo: заявок {sum(d['crm_leads'] for d in days.values())}, переходов {len(events)}, выиграно {len(won)}")
     return dict(days)
 
 

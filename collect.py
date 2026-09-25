@@ -263,6 +263,9 @@ def amo_open_snapshot(base, hdr, pipe, open_leads, t0):
                     continue
                 t["last"] = max(t["last"] or 0, e["created_at"])
                 if e["type"].startswith("outgoing"):
+                    # автоответы ботов и интеграций (created_by = 0) не считаем касанием менеджера
+                    if not e.get("created_by"):
+                        continue
                     t["out"] = min(t["out"] or e["created_at"], e["created_at"])
                 elif t["out"] and e["created_at"] >= t["out"]:
                     t["in_after"] = True

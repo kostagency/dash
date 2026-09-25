@@ -281,8 +281,12 @@ def amo_open_snapshot(base, hdr, pipe, open_leads, t0):
                 t["last"] = max(t["last"] or 0, note["created_at"])
                 if note["note_type"] == "call_out":
                     t["out"] = min(t["out"] or note["created_at"], note["created_at"])
+                t.setdefault("durs", []).append(((note.get("params") or {}).get("duration", 0), note["note_type"]))
                 if (note.get("params") or {}).get("duration", 0) >= 20:
                     t["talk"] = True
+    if os.environ.get("AMO_DESCRIBE"):
+        for i, t in touch.items():
+            print(f"  amo: сделка {i} статус {names.get(open_leads[i])} исх={bool(t['out'])} ответ_после={t['in_after']} звонок>=20с={t['talk']} длит={t.get('durs')}")
     comm, by_status, none_ids, now = {"talked": 0, "tried": 0, "none": 0}, defaultdict(int), [], time.time()
     stale = []
     for i, sid in open_leads.items():

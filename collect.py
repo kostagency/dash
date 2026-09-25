@@ -152,6 +152,16 @@ def amo_rows(cfg, since, until, tz):
             print(f"    {s['id']}\t{s['sort']}\t{s['name']}")
     stage_sort = [min((order.get(i, 10**9) for i in st["status_ids"]), default=10**9) for st in stages]
 
+    # справочники причин отказа (настройки аккаунта, без данных сделок: в лог выводить можно)
+    reasons = {r["id"]: r["name"] for r in http_json(base + "leads/loss_reasons", hdr).get("_embedded", {}).get("loss_reasons", [])}
+    fields = http_json(base + "leads/custom_fields?limit=250", hdr).get("_embedded", {}).get("custom_fields", [])
+    if os.environ.get("AMO_DESCRIBE"):
+        print("  amo: причины отказа:", sorted(reasons.values()))
+        for f in fields:
+            if re.search(r"причин|отказ|квал|закрыт|почему", f["name"], re.I):
+                opts = [e["value"] for e in (f.get("enums") or [])]
+                print(f"  amo: поле {f['id']} «{f['name']}» тип {f['type']} варианты {opts}")
+
     t0 = int(datetime.combine(since, datetime.min.time(), tz).timestamp())
     t1 = int(datetime.combine(until + timedelta(days=1), datetime.min.time(), tz).timestamp())
 

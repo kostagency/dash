@@ -291,6 +291,8 @@ function render(){
     const base=i===0?c=>c.leads:c=>c.st[i-1];
     t+=line('конверсия',c=>on?fp(pct(c.st[i],base(c))):'—','sub');
   });
+  t+=line('Закрыто (не реализовано)',c=>on?n0(c.lost):'—');
+  t+=line('из них не квал',c=>{if(!on)return '—';let n=0;for(const k in c.lr)if(groupOf(k)==='Не квал')n+=c.lr[k];return n0(n)},'sub');
   t+=line('Сумма оплат',c=>on?money(c.rev):'—');
   t+=line('ROMI',c=>on&&c.spend?Math.round((c.rev-c.spend)/c.spend*100)+'%':'—');
   $('days').innerHTML=t+'</tbody>';

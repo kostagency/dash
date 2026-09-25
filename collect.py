@@ -281,7 +281,8 @@ def amo_open_snapshot(base, hdr, pipe, open_leads, t0):
                 t["last"] = max(t["last"] or 0, note["created_at"])
                 if note["note_type"] == "call_out":
                     t["out"] = min(t["out"] or note["created_at"], note["created_at"])
-                t.setdefault("durs", []).append(((note.get("params") or {}).get("duration", 0), note["note_type"]))
+                pr = note.get("params") or {}
+                t.setdefault("durs", []).append((pr.get("duration", 0), note["note_type"], pr.get("call_status"), pr.get("call_result")))
                 if (note.get("params") or {}).get("duration", 0) >= 20:
                     t["talk"] = True
     if os.environ.get("AMO_DESCRIBE"):

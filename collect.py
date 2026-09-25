@@ -180,7 +180,7 @@ def amo_rows(cfg, since, until, tz):
     day = lambda ts: datetime.fromtimestamp(ts, tz).date().isoformat()
 
     # заявки: сделки воронки, созданные за период
-    fresh = set()
+    fresh, open_leads = set(), {}
     def field(l, fid):
         for f in l.get("custom_fields_values") or []:
             if f["field_id"] == fid and f["values"]:
@@ -193,6 +193,8 @@ def amo_rows(cfg, since, until, tz):
         fresh.add(l["id"])
         q = field(l, a.get("qual_field_id"))
         row["qual"][(q or "Не указана")[:1] if q else "Не указана"] += 1
+        if l["status_id"] not in (142, 143):
+            open_leads[l["id"]] = l["status_id"]
         if l["status_id"] == 143:
             # закрытая: штатная причина amo, если нет, то поле «Причина отказа»
             lr = (l.get("_embedded", {}).get("loss_reason") or [{}])[0].get("name") or reasons.get(l.get("loss_reason_id"))
@@ -236,7 +238,65 @@ def amo_rows(cfg, since, until, tz):
         for l in r.get("_embedded", {}).get("leads", []):
             days[won[l["id"]]]["revenue"] += l.get("price") or 0
     print(f"  amo: заявок {sum(d['crm_leads'] for d in days.values())}, переходов {len(events)}, выиграно {len(won)}")
-    return dict(days)
+    snapshot = amo_open_snapshot(base, hdr, pipe, open_leads, t0)
+    return {"days": dict(days), "open": snapshot}
+
+
+def amo_open_snapshot(base, hdr, pipe, open_leads, t0):
+    """Снимок открытых сделок: статус сейчас и была ли связь с человеком."""
+    names = {s["id"]: s["name"] for s in pipe["_embedded"]["statuses"]}
+    sort = {s["id"]: s["sort"] for s in pipe["_embedded"]["statuses"]}
+    ids = list(open_leads)
+    touch = {i: {"out": None, "in_after": False, "talk": False, "last": None} for i in ids}
+    for k in range(0, len(ids), 10):
+        chunk = ids[k:k + 10]
+        q = [("filter[entity]", "lead"), ("filter[created_at][from]", t0), ("limit", 100)]
+        q += [("filter[type][]", t) for t in ("incoming_chat_message", "outgoing_chat_message", "incoming_call", "outgoing_call")]
+        q += [("filter[entity_id][]", i) for i in chunk]
+        page = 1
+        while True:
+            r = http_json(base + "events?" + urllib.parse.urlencode(q + [("page", page)]), hdr)
+            evs = sorted(r.get("_embedded", {}).get("events", []), key=lambda e: e["created_at"])
+            for e in evs:
+                t = touch.get(e["entity_id"])
+                if not t:
+                    continue
+                t["last"] = max(t["last"] or 0, e["created_at"])
+                if e["type"].startswith("outgoing"):
+                    t["out"] = min(t["out"] or e["created_at"], e["created_at"])
+                elif t["out"] and e["created_at"] >= t["out"]:
+                    t["in_after"] = True
+            if not r.get("_links", {}).get("next"):
+                break
+            page += 1
+        # звонки: разговор, если у звонка есть длительность
+        for i in chunk:
+            n = http_json(base + f"leads/{i}/notes?" + urllib.parse.urlencode(
+                [("filter[note_type][]", "call_in"), ("filter[note_type][]", "call_out"), ("limit", 50)]), hdr)
+            for note in n.get("_embedded", {}).get("notes", []) if isinstance(n, dict) else []:
+                t = touch[i]
+                t["last"] = max(t["last"] or 0, note["created_at"])
+                if note["note_type"] == "call_out":
+                    t["out"] = min(t["out"] or note["created_at"], note["created_at"])
+                if (note.get("params") or {}).get("duration", 0) >= 20:
+                    t["talk"] = True
+    comm, by_status, none_ids, now = {"talked": 0, "tried": 0, "none": 0}, defaultdict(int), [], time.time()
+    stale = []
+    for i, sid in open_leads.items():
+        t = touch[i]
+        by_status[names.get(sid, str(sid))] += 1
+        if t["talk"] or t["in_after"]:
+            comm["talked"] += 1
+        elif t["out"]:
+            comm["tried"] += 1
+        else:
+            comm["none"] += 1
+            none_ids.append(i)
+        if not t["last"] or now - t["last"] > 86400:
+            stale.append(i)
+    order = sorted(by_status, key=lambda n: min((sort[s] for s in sort if names[s] == n), default=0))
+    return {"total": len(open_leads), "by_status": [[n, by_status[n]] for n in order], "comm": comm,
+            "none_ids": none_ids[:30], "stale": len(stale), "stale_ids": stale[:30]}
 
 
 CRM = {"amo": amo_rows}
@@ -263,6 +323,9 @@ def build(path):
 
     crm_type = cfg.get("crm", {}).get("type", "none")
     crm = CRM[crm_type](cfg, since, today, tz) if crm_type in CRM else None
+    crm_open = None
+    if isinstance(crm, dict) and "days" in crm:
+        crm, crm_open = crm["days"], crm["open"]
 
     data = {
         "brand": cfg.get("brand", ""),
@@ -280,6 +343,8 @@ def build(path):
                            for s in cfg.get("crm", {}).get("amo", {}).get("stages", [])]},
         "ads": ads,
         "crm_days": crm or {},
+        "crm_open": crm_open,
+        "crm_url": f"https://{cfg['crm']['amo']['domain']}/leads/detail/" if crm_type == "amo" else None,
         "loss_groups": cfg.get("crm", {}).get("amo", {}).get("loss_groups", {}),
         "budgets": {k: v["daily_budget_usd"] * rate for k, v in status.items() if v["status"] == "ACTIVE"},
     }

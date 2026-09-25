@@ -85,6 +85,11 @@ h1{margin:3px 0 0;font-size:21px;font-weight:800;letter-spacing:-.01em}
 .tag{font-size:9px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
 .tag.ok{background:var(--ok-bg);color:var(--ok)} .tag.bad{background:var(--bad-bg);color:var(--bad)} .tag.wait{background:var(--wait-bg);color:var(--wait)}
 
+/* в работе */
+.lt.warn .v{color:var(--bad)}
+.ids{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ids a{font-size:11px;font-weight:800;color:var(--brand);background:var(--soft);padding:4px 9px;border-radius:999px;text-decoration:none}
+.ids a:hover{text-decoration:underline}
 /* закрытые */
 .lost-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .lt{background:var(--soft);border-radius:16px;padding:14px}
@@ -171,6 +176,15 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
   </div>
 
   <div class="kpis" id="kpis"></div>
+
+  <div class="box" id="open-box" hidden>
+    <div class="h"><div class="cap">В работе сейчас</div><span class="hint">открытые сделки с начала проекта, снимок на момент обновления</span></div>
+    <div class="lost-tiles" id="open-tiles"></div>
+    <div class="lost-grid">
+      <div><div class="cap" style="margin-bottom:6px">На каком этапе</div><div id="open-status"></div></div>
+      <div id="open-ids"></div>
+    </div>
+  </div>
 
   <div class="box" id="lost-box">
     <div class="h"><div class="cap">Закрытые сделки и причины</div><span class="hint">сделки, пришедшие с начала проекта и закрытые как «не реализовано»</span></div>
@@ -297,7 +311,7 @@ function render(){
   t+=line('ROMI',c=>on&&c.spend?Math.round((c.rev-c.spend)/c.spend*100)+'%':'—');
   $('days').innerHTML=t+'</tbody>';
 
-  renderLost(s);
+  renderLost(s); renderOpen();
   const dow=(new Date(D.today+'T00:00:00Z').getUTCDay()+6)%7, mon=add(D.today,-dow);
   let w='';
   for(let i=0;i<3;i++){
@@ -320,6 +334,24 @@ function render(){
 function groupOf(r){
   for(const [g,list] of Object.entries(D.loss_groups||{})) if(list.some(x=>x.toLowerCase()===r.toLowerCase())) return g;
   return r==='Не указана'?'Причина не указана':'Другое';
+}
+function renderOpen(){
+  const o=D.crm_open; $('open-box').hidden=!o;
+  if(!o) return;
+  const c=o.comm, t=o.total||0;
+  $('open-tiles').innerHTML=[
+    ['В работе',n0(t),'сделок не закрыто',''],
+    ['Общались',n0(c.talked),t?fp(pct(c.talked,t))+' · ответил или был разговор':'—',''],
+    ['Пытались, нет ответа',n0(c.tried),t?fp(pct(c.tried,t))+' · писали или звонили':'—',''],
+    ['Не связывались',n0(c.none),t?fp(pct(c.none,t))+' · ни звонка, ни сообщения':'—',c.none?'warn':''],
+  ].map(([l,v,x,k])=>`<div class="lt ${k}"><div class="cap">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
+  const mx=Math.max(1,...o.by_status.map(x=>x[1]));
+  $('open-status').innerHTML=o.by_status.length?o.by_status.map(([n,v])=>`<div class="rs"><div><div class="n">${esc(n)}</div></div><div class="c num">${v} · ${fp(pct(v,t))}</div><div class="b"><i style="width:${v/mx*100}%"></i></div></div>`).join(''):'<div class="empty">Открытых сделок нет</div>';
+  const link=i=>D.crm_url?`<a href="${D.crm_url}${i}" target="_blank" rel="noopener">#${i}</a>`:`<span>#${i}</span>`;
+  $('open-ids').innerHTML=
+    `<div class="cap" style="margin-bottom:4px">Не связывались</div>`+(o.none_ids.length?`<div class="ids">${o.none_ids.map(link).join('')}</div>`:'<div class="empty">Все сделки в контакте</div>')+
+    `<div class="cap" style="margin:16px 0 4px">Без касания больше суток: ${n0(o.stale)}</div>`+(o.stale_ids.length?`<div class="ids">${o.stale_ids.map(link).join('')}</div>`:'<div class="empty">Нет</div>')+
+    `<div class="g" style="font-size:10px;color:var(--muted);margin-top:10px">Ссылки открываются только у тех, у кого есть вход в amoCRM</div>`;
 }
 function renderLost(s){
   $('lost-box').hidden=!crmOn();

@@ -283,11 +283,14 @@ def amo_open_snapshot(base, hdr, pipe, open_leads, t0):
                     t["out"] = min(t["out"] or note["created_at"], note["created_at"])
                 pr = note.get("params") or {}
                 t.setdefault("durs", []).append((pr.get("duration", 0), note["note_type"], pr.get("call_status"), pr.get("call_result")))
-                if (note.get("params") or {}).get("duration", 0) >= 20:
+                # call_status amo: 4 = разговор состоялся, 6 = не дозвонился. Длительность у телефонии включает гудки,
+                # поэтому без статуса разговором считаем только звонок дольше минуты
+                cs = pr.get("call_status")
+                if cs == 4 or (cs is None and pr.get("duration", 0) >= 60):
                     t["talk"] = True
     if os.environ.get("AMO_DESCRIBE"):
         for i, t in touch.items():
-            print(f"  amo: сделка {i} статус {names.get(open_leads[i])} исх={bool(t['out'])} ответ_после={t['in_after']} звонок>=20с={t['talk']} длит={t.get('durs')}")
+            print(f"  amo: сделка {i} статус {names.get(open_leads[i])} исх={bool(t['out'])} ответ_после={t['in_after']} разговор={t['talk']} длит={t.get('durs')}")
     comm, by_status, none_ids, now = {"talked": 0, "tried": 0, "none": 0}, defaultdict(int), [], time.time()
     stale = []
     for i, sid in open_leads.items():

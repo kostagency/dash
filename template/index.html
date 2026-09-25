@@ -85,6 +85,28 @@ h1{margin:3px 0 0;font-size:21px;font-weight:800;letter-spacing:-.01em}
 .tag{font-size:9px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
 .tag.ok{background:var(--ok-bg);color:var(--ok)} .tag.bad{background:var(--bad-bg);color:var(--bad)} .tag.wait{background:var(--wait-bg);color:var(--wait)}
 
+/* закрытые */
+.lost-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.lt{background:var(--soft);border-radius:16px;padding:14px}
+.lt .v{font-size:22px;font-weight:800;margin-top:6px}
+.lt .s{font-size:11px;color:var(--muted);margin-top:2px}
+.lt.nq .v{color:var(--bad)}
+.lost-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:18px}
+.rs{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.rs:last-child{border-bottom:0}
+.rs .n{font-size:12px;font-weight:800}
+.rs .g{font-size:10px;color:var(--muted)}
+.rs .c{font-size:13px;font-weight:800;text-align:right}
+.rs .b{grid-column:1/-1;height:5px;background:var(--soft);border-radius:4px;overflow:hidden}
+.rs .b i{display:block;height:100%;border-radius:4px;background:var(--brand)}
+.rs.nq .b i{background:var(--bad)} .rs.nr .b i{background:var(--faint)}
+.qual{display:flex;flex-direction:column;gap:8px}
+.qr{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800}
+.qr .k{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--soft);flex:none}
+.qr .bb{flex:1;height:8px;background:var(--soft);border-radius:4px;overflow:hidden}.qr .bb i{display:block;height:100%;background:var(--brand)}
+.qr .c{width:70px;text-align:right;color:var(--muted)}
+.empty{font-size:12px;color:var(--muted);padding:10px 0}
+@media (max-width:960px){.lost-tiles{grid-template-columns:repeat(2,1fr)}.lost-grid{grid-template-columns:1fr}}
 /* динамика */
 .box{background:var(--card);border-radius:22px;padding:20px 22px;margin-bottom:18px}
 .box .h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
@@ -150,6 +172,15 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
 
   <div class="kpis" id="kpis"></div>
 
+  <div class="box" id="lost-box">
+    <div class="h"><div class="cap">Закрытые сделки и причины</div><span class="hint">сделки, пришедшие с начала проекта и закрытые как «не реализовано»</span></div>
+    <div class="lost-tiles" id="lost-tiles"></div>
+    <div class="lost-grid">
+      <div><div class="cap" style="margin-bottom:6px">Причины закрытия</div><div id="lost-reasons"></div></div>
+      <div><div class="cap" style="margin-bottom:10px">Квалификация заявок</div><div class="qual" id="qual"></div></div>
+    </div>
+  </div>
+
   <div class="box">
     <div class="h"><div class="cap">Динамика по дням</div><span class="hint">итог периода, дальше дни по порядку</span></div>
     <div class="scroll"><table id="days"></table></div>
@@ -193,14 +224,14 @@ function range(p){
 }
 function days(a,b){
   const m={};
-  for(let d=a;d<=b;d=add(d,1)) m[d]={date:d,spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0};
+  for(let d=a;d<=b;d=add(d,1)) m[d]={date:d,spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0,crm:0,lost:0,lr:{},q:{}};
   for(const r of D.ads) if(m[r.date]){const x=m[r.date];x.spend+=r.spend;x.impr+=r.impressions;x.clicks+=r.clicks;x.leads+=r.leads}
-  for(const [d,c] of Object.entries(D.crm_days||{})) if(m[d]){c.stages.forEach((v,i)=>m[d].st[i]+=v);m[d].rev+=c.revenue}
+  for(const [d,c] of Object.entries(D.crm_days||{})) if(m[d]){const x=m[d];c.stages.forEach((v,i)=>x.st[i]+=v);x.rev+=c.revenue;x.crm+=c.crm_leads||0;x.lost+=c.lost||0;for(const [k,v] of Object.entries(c.lost_reasons||{}))x.lr[k]=(x.lr[k]||0)+v;for(const [k,v] of Object.entries(c.qual||{}))x.q[k]=(x.q[k]||0)+v}
   return Object.values(m);
 }
 function total(rows){
-  const s={spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0};
-  rows.forEach(r=>{s.spend+=r.spend;s.impr+=r.impr;s.clicks+=r.clicks;s.leads+=r.leads;r.st.forEach((v,i)=>s.st[i]+=v);s.rev+=r.rev});
+  const s={spend:0,impr:0,clicks:0,leads:0,st:ST().map(()=>0),rev:0,crm:0,lost:0,lr:{},q:{}};
+  rows.forEach(r=>{s.spend+=r.spend;s.impr+=r.impr;s.clicks+=r.clicks;s.leads+=r.leads;r.st.forEach((v,i)=>s.st[i]+=v);s.rev+=r.rev;s.crm+=r.crm;s.lost+=r.lost;for(const k in r.lr)s.lr[k]=(s.lr[k]||0)+r.lr[k];for(const k in r.q)s.q[k]=(s.q[k]||0)+r.q[k]});
   return s;
 }
 const cpl=s=>s.leads?s.spend/s.leads:null;
@@ -264,6 +295,7 @@ function render(){
   t+=line('ROMI',c=>on&&c.spend?Math.round((c.rev-c.spend)/c.spend*100)+'%':'—');
   $('days').innerHTML=t+'</tbody>';
 
+  renderLost(s);
   const dow=(new Date(D.today+'T00:00:00Z').getUTCDay()+6)%7, mon=add(D.today,-dow);
   let w='';
   for(let i=0;i<3;i++){
@@ -281,6 +313,29 @@ function render(){
   $('weeks').innerHTML=w;
   $('crm-note').hidden=on;
   $('crm-note').textContent='Зумы, договоры и оплаты подтянутся из amoCRM автоматически, как только подключим доступ. Сейчас на странице только реклама.';
+}
+
+function groupOf(r){
+  for(const [g,list] of Object.entries(D.loss_groups||{})) if(list.some(x=>x.toLowerCase()===r.toLowerCase())) return g;
+  return r==='Не указана'?'Причина не указана':'Другое';
+}
+function renderLost(s){
+  $('lost-box').hidden=!crmOn();
+  if(!crmOn()) return;
+  const g={}; for(const [r,n] of Object.entries(s.lr)){const k=groupOf(r);g[k]=(g[k]||0)+n}
+  const tl=[['Закрыто',n0(s.lost),s.crm?fp(pct(s.lost,s.crm))+' от заявок в CRM':'заявок в CRM за период нет',''],
+            ['Не квал',n0(g['Не квал']||0),s.lost?fp(pct(g['Не квал']||0,s.lost))+' от закрытых':'—','nq'],
+            ['Квал, но отказ',n0(g['Квал, но отказ']||0),s.lost?fp(pct(g['Квал, но отказ']||0,s.lost))+' от закрытых':'—',''],
+            ['Не дошли до разговора',n0(g['Не дошли до разговора']||0),s.lost?fp(pct(g['Не дошли до разговора']||0,s.lost))+' от закрытых':'—','']];
+  $('lost-tiles').innerHTML=tl.map(([l,v,x,c])=>`<div class="lt ${c}"><div class="cap">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
+  const rs=Object.entries(s.lr).sort((a,b)=>b[1]-a[1]), mx=Math.max(1,...rs.map(x=>x[1]));
+  $('lost-reasons').innerHTML=rs.length?rs.map(([r,n])=>{const gr=groupOf(r),cls=gr==='Не квал'?'nq':gr==='Не дошли до разговора'?'nr':'';
+    return `<div class="rs ${cls}"><div><div class="n">${esc(r)}</div><div class="g">${esc(gr)}</div></div><div class="c num">${n} · ${fp(pct(n,s.lost))}</div><div class="b"><i style="width:${n/mx*100}%"></i></div></div>`}).join('')
+    :'<div class="empty">За период закрытых сделок нет</div>';
+  const Q=[['A','цель, срочность, деньги'],['B','цель есть, нет срочности или денег'],['C','нет явной цели'],['D','не целевой, спам'],['Не указана','менеджер не заполнил']];
+  const qt=Object.values(s.q).reduce((x,y)=>x+y,0);
+  $('qual').innerHTML=qt?Q.map(([k,t])=>`<div class="qr" title="${t}"><span class="k">${k==='Не указана'?'—':k}</span><span class="bb"><i style="width:${pct(s.q[k]||0,qt)||0}%"></i></span><span class="c num">${s.q[k]||0} · ${fp(pct(s.q[k]||0,qt))}</span></div>`).join('')+'<div class="g" style="font-size:10px;color:var(--muted)">A: цель, срочность, деньги · B: цель без срочности или денег · C: нет явной цели · D: не целевой</div>'
+    :'<div class="empty">За период заявок в CRM нет</div>';
 }
 
 async function load(){

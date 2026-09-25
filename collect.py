@@ -175,15 +175,31 @@ def amo_rows(cfg, since, until, tz):
                 return out
             page += 1
 
-    days = defaultdict(lambda: {"crm_leads": 0, "stages": [0] * len(stages), "revenue": 0})
+    days = defaultdict(lambda: {"crm_leads": 0, "stages": [0] * len(stages), "revenue": 0,
+                                "lost": 0, "lost_reasons": defaultdict(int), "qual": defaultdict(int)})
     day = lambda ts: datetime.fromtimestamp(ts, tz).date().isoformat()
 
     # заявки: сделки воронки, созданные за период
     fresh = set()
-    for l in pages("leads", {"filter[pipeline_id]": a["pipeline_id"],
+    def field(l, fid):
+        for f in l.get("custom_fields_values") or []:
+            if f["field_id"] == fid and f["values"]:
+                return str(f["values"][0].get("value"))
+        return None
+    for l in pages("leads", {"filter[pipeline_id]": a["pipeline_id"], "with": "loss_reason",
                              "filter[created_at][from]": t0, "filter[created_at][to]": t1}, "leads"):
-        days[day(l["created_at"])]["crm_leads"] += 1
+        row = days[day(l["created_at"])]
+        row["crm_leads"] += 1
         fresh.add(l["id"])
+        q = field(l, a.get("qual_field_id"))
+        row["qual"][(q or "Не указана")[:1] if q else "Не указана"] += 1
+        if l["status_id"] == 143:
+            # закрытая: штатная причина amo, если нет, то поле «Причина отказа»
+            lr = (l.get("_embedded", {}).get("loss_reason") or [{}])[0].get("name") or reasons.get(l.get("loss_reason_id"))
+            r = lr or field(l, a.get("loss_field_id")) or "Не указана"
+            closed = days[day(l.get("closed_at") or l["updated_at"])]
+            closed["lost"] += 1
+            closed["lost_reasons"][r] += 1
     # с датой старта этапы считаем только по сделкам, пришедшим после старта: старые сделки в отчёт не входят
     only_fresh = bool(cfg.get("start_date"))
 
@@ -264,6 +280,7 @@ def build(path):
                            for s in cfg.get("crm", {}).get("amo", {}).get("stages", [])]},
         "ads": ads,
         "crm_days": crm or {},
+        "loss_groups": cfg.get("crm", {}).get("amo", {}).get("loss_groups", {}),
         "budgets": {k: v["daily_budget_usd"] * rate for k, v in status.items() if v["status"] == "ACTIVE"},
     }
     out = os.path.join(SITE, cfg["slug"])

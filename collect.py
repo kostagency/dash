@@ -181,7 +181,7 @@ def amo_rows(cfg, since, until, tz):
 
     # заявки: сделки воронки, созданные за период
     fresh, open_leads = set(), {}
-    list_day = os.environ.get("AMO_LIST_DAY") or "2026-09-29"  # TODO вернуть на env после сверки
+    list_day = os.environ.get("AMO_LIST_DAY")
     snames = {s["id"]: s["name"] for s in pipe["_embedded"]["statuses"]}
     listed = []
     def field(l, fid):

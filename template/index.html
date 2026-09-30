@@ -54,7 +54,7 @@ h1{margin:3px 0 0;font-size:21px;font-weight:800;letter-spacing:-.01em}
 .top{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin-bottom:18px}
 .hero{background:linear-gradient(140deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;border-radius:22px;padding:22px}
 .hero .cap{color:rgba(255,255,255,.7)}
-.hero-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.hero-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
 .ht{background:rgba(255,255,255,.12);border-radius:16px;padding:14px}
 .ht .cap{font-size:9px}
 .ht .v{font-size:23px;font-weight:800;margin-top:8px}
@@ -268,15 +268,20 @@ function render(){
   const paid=on?s.st[last]:null, romi=on&&s.spend?(s.rev-s.spend)/s.spend*100:null;
   $('hero').innerHTML=[
     ['Потрачено',money(s.spend),D.currency!=='USD'?'≈ $'+n0(s.spend/D.usd_rate):''],
-    ['Лиды',n0(s.leads),'цена лида '+money(cpl(s))],
+    ['Лиды кабинет',n0(s.leads),'по Meta · цена '+money(cpl(s))],
+    ['Заявки в CRM',on?n0(s.crm):'—',on?'факт. цена '+money(s.crm?s.spend/s.crm:null):'после подключения CRM'],
     ['Оплачено',on?n0(paid):'—',on?money(s.rev)+(romi==null?'':' · ROMI '+Math.round(romi)+'%'):'после подключения CRM'],
   ].map(([l,v,x])=>`<div class="ht"><div class="cap">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
   const P=D.plan||{}, isMonth=period==='month';
   const pb=(l,v,p,fmt)=>`<div class="pl"><div class="row"><span>${l}</span><span class="num">${fmt(v)} / ${isMonth&&p?fmt(p):'—'}</span></div><div class="bar"><i style="width:${isMonth&&p?Math.min(100,v/p*100):0}%"></i></div></div>`;
   $('plan').innerHTML=pb('Бюджет',s.spend,P.budget_month,money)+pb('Лиды',s.leads,P.leads_month,n0);
 
-  let fr=`<div class="fr"><div><div class="l">Лиды с рекламы</div><div class="s">CPL ${money(cpl(s))}</div></div><div class="v num">${n0(s.leads)}</div></div>`;
+  let fr=`<div class="fr"><div><div class="l">Лиды кабинет</div><div class="s">по данным Meta · CPL ${money(cpl(s))}</div></div><div class="v num">${n0(s.leads)}</div></div>`;
   let prev=s.leads;
+  if(on){
+    fr+=`<div class="fr"><div><div class="l">Заявки в CRM (факт)</div><div class="s">долетело ${fp(pct(s.crm,s.leads))} · факт. цена ${money(s.crm?s.spend/s.crm:null)}</div></div><div class="v num">${n0(s.crm)}</div></div>`;
+    prev=s.crm;
+  }
   st.forEach((x,i)=>{
     const v=on?s.st[i]:null;
     fr+=`<div class="fr ${on?'':'wait'}"><div><div class="l">${esc(x.label)}</div><div class="s">${on?'конверсия '+fp(pct(v,prev)):'ждёт подключения CRM'}</div></div><div class="v num">${on?n0(v):'—'}</div></div>`;
@@ -298,11 +303,14 @@ function render(){
   const line=(name,f,cls='')=>`<tr class="${cls}"><td>${name}</td>${cols.map((c,j)=>{const v=f(c);return `<td class="num ${j?'':'tot'} ${v==='0'||v==='—'||v==='0 ₸'?'z':''}">${v}</td>`}).join('')}</tr>`;
   let t='<thead><tr><th>Метрика</th>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
   t+=line('Расход',c=>money(c.spend));
-  t+=line('Лиды',c=>n0(c.leads));
-  t+=line('Цена лида',c=>money(cpl(c)));
+  t+=line('Лиды кабинет',c=>n0(c.leads));
+  t+=line('Цена лида (кабинет)',c=>money(cpl(c)));
+  t+=line('Заявки в CRM (факт)',c=>on?n0(c.crm):'—');
+  t+=line('Факт. цена заявки',c=>on?money(c.crm?c.spend/c.crm:null):'—');
+  t+=line('Долетело до CRM',c=>on?(c.leads?fp(pct(c.crm,c.leads)):'—'):'—','sub');
   st.forEach((x,i)=>{
     t+=line(esc(x.label),c=>stv(c,i));
-    const base=i===0?c=>c.leads:c=>c.st[i-1];
+    const base=i===0?(on?c=>c.crm:c=>c.leads):c=>c.st[i-1];
     t+=line('конверсия',c=>on?fp(pct(c.st[i],base(c))):'—','sub');
   });
   t+=line('Закрыто (не реализовано)',c=>on?n0(c.lost):'—');
@@ -384,7 +392,7 @@ async function load(){
     const u=new Date(D.updated_at);
     $('conn').textContent='Meta ✓ · '+(crmOn()?'amoCRM ✓':'amoCRM —');
     $('foot').textContent='Обновлено '+u.toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+
-      ' · автообновление каждые 15 минут'+(D.currency!=='USD'?' · расход по курсу Нацбанка '+String(D.usd_rate).replace('.',',')+' ₸':'')+' · лид = начатая переписка в WhatsApp';
+      ' · автообновление каждые 15 минут'+(D.currency!=='USD'?' · расход по курсу Нацбанка '+String(D.usd_rate).replace('.',',')+' ₸':'')+' · лид кабинета — результат в Meta, заявка — сделка в amoCRM';
     $('err').style.display='none';
     const minD=D.start_date||D.ads.reduce((m,r)=>r.date<m?r.date:m,D.today);
     ['d-from','d-to'].forEach(id=>{$(id).min=minD;$(id).max=D.today});

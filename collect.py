@@ -181,6 +181,9 @@ def amo_rows(cfg, since, until, tz):
 
     # заявки: сделки воронки, созданные за период
     fresh, open_leads = set(), {}
+    list_day = os.environ.get("AMO_LIST_DAY") or "2026-09-29"  # TODO вернуть на env после сверки
+    snames = {s["id"]: s["name"] for s in pipe["_embedded"]["statuses"]}
+    listed = []
     def field(l, fid):
         for f in l.get("custom_fields_values") or []:
             if f["field_id"] == fid and f["values"]:
@@ -191,6 +194,8 @@ def amo_rows(cfg, since, until, tz):
         row = days[day(l["created_at"])]
         row["crm_leads"] += 1
         fresh.add(l["id"])
+        if list_day and day(l["created_at"]) == list_day:
+            listed.append(l)
         q = field(l, a.get("qual_field_id"))
         row["qual"][(q or "Не указана")[:1] if q else "Не указана"] += 1
         if l["status_id"] not in (142, 143):
@@ -202,6 +207,19 @@ def amo_rows(cfg, since, until, tz):
             closed = days[day(l.get("closed_at") or l["updated_at"])]
             closed["lost"] += 1
             closed["lost_reasons"][r] += 1
+    if list_day:
+        print(f"  amo-list {list_day}: сделок в воронке создано {len(listed)}")
+        for l in listed:
+            cf = []
+            for f in l.get("custom_fields_values") or []:
+                nm = f.get("field_name", "")
+                val = f["values"][0].get("value") if f.get("values") else ""
+                if re.search(r"utm|источ|канал|тел|phone|whats|сайт|form|ad_|campaign", str(nm), re.I):
+                    cf.append(f"{nm}={val}")
+            tm = datetime.fromtimestamp(l["created_at"], tz).strftime("%H:%M")
+            print(f"    #{l['id']} {tm} | {str(l.get('name',''))[:34]} | статус: {snames.get(l['status_id'],'?')} | "
+                  f"бюджет {l.get('price') or 0} | {' ; '.join(cf) if cf else 'без utm/источника'}")
+
     # с датой старта этапы считаем только по сделкам, пришедшим после старта: старые сделки в отчёт не входят
     only_fresh = bool(cfg.get("start_date"))
 

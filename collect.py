@@ -175,8 +175,16 @@ def amo_rows(cfg, since, until, tz):
                 return out
             page += 1
 
-    days = defaultdict(lambda: {"crm_leads": 0, "stages": [0] * len(stages), "revenue": 0,
+    days = defaultdict(lambda: {"crm_leads": 0, "crm_ads": 0, "stages": [0] * len(stages), "revenue": 0,
                                 "lost": 0, "lost_reasons": defaultdict(int), "qual": defaultdict(int)})
+    # заявка считается «с рекламы», если у сделки есть рекламные utm-метки трафика
+    UTM_KEYS = {"utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"}
+    def is_ad(l):
+        for f in l.get("custom_fields_values") or []:
+            nm = str(f.get("field_name", "")).strip().lower()
+            if nm in UTM_KEYS and f.get("values") and str(f["values"][0].get("value") or "").strip():
+                return True
+        return False
     day = lambda ts: datetime.fromtimestamp(ts, tz).date().isoformat()
 
     # заявки: сделки воронки, созданные за период
@@ -193,6 +201,8 @@ def amo_rows(cfg, since, until, tz):
                              "filter[created_at][from]": t0, "filter[created_at][to]": t1}, "leads"):
         row = days[day(l["created_at"])]
         row["crm_leads"] += 1
+        if is_ad(l):
+            row["crm_ads"] += 1
         fresh.add(l["id"])
         if list_day and day(l["created_at"]) == list_day:
             listed.append(l)

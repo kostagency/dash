@@ -269,7 +269,7 @@ function render(){
   $('hero').innerHTML=[
     ['Потрачено',money(s.spend),D.currency!=='USD'?'≈ $'+n0(s.spend/D.usd_rate):''],
     ['Лиды кабинет',n0(s.leads),'по Meta · цена '+money(cpl(s))],
-    ['Заявки в CRM',on?n0(s.crmA)+' / '+n0(s.crm):'—',on?'с рекламы / всего · цена '+money(s.crmA?s.spend/s.crmA:null):'после подключения CRM'],
+    ['Заявки в CRM',on?n0(s.crm):'—',on?'факт. цена '+money(s.crm?s.spend/s.crm:null):'после подключения CRM'],
     ['Оплачено',on?n0(paid):'—',on?money(s.rev)+(romi==null?'':' · ROMI '+Math.round(romi)+'%'):'после подключения CRM'],
   ].map(([l,v,x])=>`<div class="ht"><div class="cap">${l}</div><div class="v num">${v}</div><div class="s">${x}</div></div>`).join('');
   const P=D.plan||{}, isMonth=period==='month';
@@ -279,8 +279,8 @@ function render(){
   let fr=`<div class="fr"><div><div class="l">Лиды кабинет</div><div class="s">по данным Meta · CPL ${money(cpl(s))}</div></div><div class="v num">${n0(s.leads)}</div></div>`;
   let prev=s.leads;
   if(on){
-    fr+=`<div class="fr"><div><div class="l">Заявки в CRM (с рекламы)</div><div class="s">всего в воронку ${n0(s.crm)} · долетело ${fp(pct(s.crmA,s.leads))} · факт. цена ${money(s.crmA?s.spend/s.crmA:null)}</div></div><div class="v num">${n0(s.crmA)}</div></div>`;
-    prev=s.crmA;
+    fr+=`<div class="fr"><div><div class="l">Заявки в CRM (факт)</div><div class="s">долетело ${fp(pct(s.crm,s.leads))} · факт. цена ${money(s.crm?s.spend/s.crm:null)}</div></div><div class="v num">${n0(s.crm)}</div></div>`;
+    prev=s.crm;
   }
   st.forEach((x,i)=>{
     const v=on?s.st[i]:null;
@@ -305,13 +305,12 @@ function render(){
   t+=line('Расход',c=>money(c.spend));
   t+=line('Лиды кабинет',c=>n0(c.leads));
   t+=line('Цена лида (кабинет)',c=>money(cpl(c)));
-  t+=line('Заявки с рекламы',c=>on?n0(c.crmA):'—');
-  t+=line('Заявки всего в воронку',c=>on?n0(c.crm):'—','sub');
-  t+=line('Факт. цена заявки',c=>on?money(c.crmA?c.spend/c.crmA:null):'—');
-  t+=line('Долетело до CRM',c=>on?(c.leads?fp(pct(c.crmA,c.leads)):'—'):'—','sub');
+  t+=line('Заявки в CRM (факт)',c=>on?n0(c.crm):'—');
+  t+=line('Факт. цена заявки',c=>on?money(c.crm?c.spend/c.crm:null):'—');
+  t+=line('Долетело до CRM',c=>on?(c.leads?fp(pct(c.crm,c.leads)):'—'):'—','sub');
   st.forEach((x,i)=>{
     t+=line(esc(x.label),c=>stv(c,i));
-    const base=i===0?(on?c=>c.crmA:c=>c.leads):c=>c.st[i-1];
+    const base=i===0?(on?c=>c.crm:c=>c.leads):c=>c.st[i-1];
     t+=line('конверсия',c=>on?fp(pct(c.st[i],base(c))):'—','sub');
   });
   t+=line('Закрыто (не реализовано)',c=>on?n0(c.lost):'—');

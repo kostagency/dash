@@ -151,7 +151,7 @@ tr.sub td:first-child{padding-left:22px;font-weight:700}
     <div class="pills">
       <span class="pill dark" id="conn">Подключения</span>
       <div class="periods" role="group" aria-label="Период">
-        <button data-p="today">Сегодня</button><button data-p="7">7 дней</button><button data-p="month" aria-pressed="true">Месяц</button><button data-p="prev">Прошлый</button><button data-p="custom">Свой период</button>
+        <button data-p="today">Сегодня</button><button data-p="yesterday">Вчера</button><button data-p="3">3 дня</button><button data-p="7">7 дней</button><button data-p="month" aria-pressed="true">Месяц</button><button data-p="prev">Прошлый</button><button data-p="custom">Свой период</button>
       </div>
       <span class="custom" id="custom" hidden>
         <label>с <input type="date" id="d-from"></label>
@@ -231,6 +231,8 @@ function range(p){
   const t=D.today,[y,m]=t.split('-').map(Number),mm=String(m).padStart(2,'0');
   if(p==='custom'){const f=$('d-from').value||t, to=$('d-to').value||t; return f<=to?[f,to,'Главное за период']:[to,f,'Главное за период']}
   if(p==='today') return [t,t,'Главное за сегодня'];
+  if(p==='yesterday'){const yd=add(t,-1);return [yd,yd,'Главное за вчера'];}
+  if(p==='3') return [add(t,-2),t,'Главное за 3 дня'];
   if(p==='7') return [add(t,-6),t,'Главное за 7 дней'];
   if(p==='month') return [`${y}-${mm}-01`,t,'Главное за месяц'];
   const pm=m===1?12:m-1,py=m===1?y-1:y,pp=String(pm).padStart(2,'0'),last=new Date(Date.UTC(py,pm,0)).getUTCDate();
